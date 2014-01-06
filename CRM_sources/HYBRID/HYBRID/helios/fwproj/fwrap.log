@@ -1,0 +1,5 @@
+2013-05-31 04:16:15,482 fwrap DEBUG: 580 - Command line arguments: 
+2013-05-31 04:16:15,482 fwrap DEBUG: 137 - Running with following options:
+2013-05-31 04:16:15,483 fwrap DEBUG: 201 - Wrapping the following source:
+2013-05-31 04:16:15,483 fwrap DEBUG: 203 -   eqmodel.f
+2013-05-31 04:16:15,483 fwrap INFO: 206 - Parsing source files.

@@ -1,0 +1,1376 @@
+c-------------------------------------------------------------------------------
+c
+c         linerd Line Ratio Diagnostic Program   
+c
+c         Authors : Jorge M. Munoz Burgos 
+c         General Atomics / Auburn University    
+c
+c         Date : Nov 2010
+c
+c-------------------------------------------------------------------------------
+      program linerd
+      implicit none
+
+c-------------------------------------------------------------------------------
+c  Type declarations - lengths of reals, integers, and complexes
+c-------------------------------------------------------------------------------
+      integer, parameter :: rprec = SELECTED_REAL_KIND(12,100)
+      integer, parameter :: iprec = SELECTED_INT_KIND(12)
+      integer, parameter :: rdprec = SELECTED_REAL_KIND(6,37)
+      integer, parameter :: cprec = KIND((1.0_rprec,1.0_rprec))
+                  
+c-------------------------------------------------------------------------------
+c  Other parameters
+c-------------------------------------------------------------------------------
+      real(rprec), parameter :: zero = 0.0_rprec
+      real(rprec), parameter :: pzero = 1.0e-30_rprec
+      real(rprec), parameter :: infinity = 1.0e+30_rprec
+      real(rprec), parameter :: pi = 3.14159265358979323846264338328
+      real(rprec), parameter :: twopi = 6.28318530717958647692528677
+
+c-------------------------------------------------------------------------------
+c  Atomic parameters
+c-------------------------------------------------------------------------------
+      real(rprec), parameter :: Aij_667_99 = 6.3705e+7_rprec
+      real(rprec), parameter :: Aij_668_15 = 1.5100e+4_rprec
+      real(rprec), parameter :: Aij_706_71 = 1.5474e+7_rprec
+      real(rprec), parameter :: Aij_706_72 = 9.2844e+6_rprec
+      real(rprec), parameter :: Aij_706_77 = 3.0948e+6_rprec
+      real(rprec), parameter :: Aij_728_34 = 1.8299e+7_rprec
+      real(rprec), parameter :: wt_1s_3s_3S1 = 3.0_rprec
+      real(rprec), parameter :: wt_1s_3s_1S0 = 1.0_rprec
+      real(rprec), parameter :: wt_1s_3d_1D2 = 5.0_rprec
+      real(rprec), parameter :: wt_1s_3d_3D2 = 5.0_rprec
+      real(rprec), parameter :: totwt_1s_3s_3S = 3.0_rprec
+      real(rprec), parameter :: totwt_1s_3s_1S = 1.0_rprec
+      real(rprec), parameter :: totwt_1s_3d_1D = 5.0_rprec
+      real(rprec), parameter :: totwt_1s_3d_3D = 15.0_rprec
+
+c-------------------------------------------------------------------------------
+c  Uncertainties in the atomic model
+c-------------------------------------------------------------------------------
+      real(rprec), parameter :: dAij_667 = 
+     &                          dsqrt(2.0_rprec*(0.01_rprec)**2)
+      real(rprec), parameter :: dAij_706 =
+     &                          dsqrt(3.0_rprec*(0.01_rprec)**2)
+      real(rprec), parameter :: dAij_728 = 0.01_rprec
+      real(rprec), parameter :: gamma_ij = 0.95_rprec
+      real(rprec), parameter :: dNi = 0.05_rprec
+
+      real(rprec), parameter :: dTeRm = dsqrt(dAij_706**2 + 
+     &                                        dAij_728**2 +
+     &               2.0_rprec*(1.0_rprec-gamma_ij)*dNi**2)   
+      real(rprec), parameter :: dNeRm = dsqrt(dAij_667**2 + 
+     &                                        dAij_728**2 +
+     &               2.0_rprec*(1.0_rprec-gamma_ij)*dNi**2)   
+      real(rprec), parameter :: dTeNeRm = dsqrt(dAij_706**2 + 
+     &                                          dAij_667**2 +
+     &                 2.0_rprec*(1.0_rprec-gamma_ij)*dNi**2)   
+
+c-------------------------------------------------------------------------------
+c  Ion beam parameters
+c-------------------------------------------------------------------------------
+      integer(iprec), parameter :: nTe = 210_iprec
+      integer(iprec), parameter :: nNe = 135_iprec
+      integer(iprec), parameter :: nTet = 125_iprec
+      integer(iprec), parameter :: nNet = 76_iprec
+      integer(iprec), parameter :: nmtrx = 19_iprec
+      real(rprec), parameter :: vb = 1.5e+3_rprec
+c      real(rprec), parameter :: vb = 1.7e+3_rprec
+c      real(rprec), parameter :: ro = 0.5_rprec
+      real(rprec), parameter :: ro = 0.554_rprec
+c      real(rprec), parameter :: ro = 2.377_rprec
+      real(rprec), parameter :: Ne_ref = 1.0e+12_rprec
+      real(rprec), dimension(nmtrx), parameter :: Noi = (/
+     & 1.0_rprec, 0.0_rprec, 0.0_rprec, 0.0_rprec, 0.0_rprec, 
+     & 0.0_rprec, 0.0_rprec, 0.0_rprec, 0.0_rprec, 0.0_rprec,
+     & 0.0_rprec, 0.0_rprec, 0.0_rprec, 0.0_rprec, 0.0_rprec,
+     & 0.0_rprec, 0.0_rprec, 0.0_rprec, 0.0_rprec/)                                   
+
+c-------------------------------------------------------------------------------
+c  Smoothing parameters
+c-------------------------------------------------------------------------------
+      real(rprec), parameter :: intpar = 1.0e+7_rprec
+      integer(iprec), parameter :: np = 101_iprec
+      integer(iprec), parameter :: ld = 0_iprec
+      integer(iprec), parameter :: mp = 5_iprec
+      logical, parameter :: smth = .false.
+                            
+c-------------------------------------------------------------------------------
+c  Variables declaration
+c-------------------------------------------------------------------------------
+c-------------------------------------------------------------------------------
+c-- processing variables ------------------------------------------------------- 
+c-------------------------------------------------------------------------------
+      character(len=200) :: data_file      
+      logical :: ex, op
+      integer(iprec) :: i, j, k, l, m, n
+      integer(iprec) :: ntemp, ndens, nexp, ndt
+      real(rprec) :: x, t, ri
+
+      real(rprec) :: Te(nTe), Ne(nNe), Tet(nTet), Net(nNet)     
+      real(rprec) :: TeR(nTe,nNe), NeR(nTe,nNe), TeNeR(nTe,nNe)
+      real(rprec) :: TeRt(nTe,nNe), NeRt(nTe,nNe), TeNeRt(nTe,nNe)
+      real(rprec) :: No(nmtrx), Nt(nmtrx,nTet,nNet), Xv(nmtrx)
+      real(rprec) :: Yv(nmtrx,nmtrx)      
+      real(rprec) :: exps(nmtrx), recv(nmtrx,nmtrx)
+      real(rprec) :: VRmtr(nmtrx,nmtrx), VRinv(nmtrx,nmtrx)      
+
+      real(rprec) :: Nein(nNet*nmtrx), Datain(nNet*nmtrx)     
+      real(rprec) :: lamda(nTet,nNet,nmtrx) 
+      real(rprec) :: Rvect(nTet,nNet,nmtrx,nmtrx)     
+      real(rprec) :: VM(nTet,nNet,nmtrx,nmtrx)
+      real(rprec) :: VI(nTet,nNet,nmtrx,nmtrx)
+      
+      real(rprec) :: I_667_99, I_668_15 
+      real(rprec) :: I_706_71, I_706_72, I_706_77, I_728_34
+      real(rprec) :: dTeRtot, dNeRtot, dTeNeRtot
+      
+      real(rprec) :: min, min_p, min_m
+      real(rprec) :: chisqrt, chisq_p, chisq_m, chi_te_ne, chi_te_ne_o
+      integer(iprec) :: indx_Te, indx_Ne 
+      integer(iprec) :: indx_Tep, indx_Nep, indx_Tem, indx_Nem
+
+      real(rprec) :: Vmag, K1, K2
+      real(rprec) :: Xvec(3), Yvec(3), Vn1(3), Vn2(3)
+      real(rprec) :: xi(2), yi(2), xj, yj
+        
+c-------------------------------------------------------------------------------
+c-- allocatable variables ------------------------------------------------------ 
+c-------------------------------------------------------------------------------
+      real(rprec), allocatable :: I_667exp(:), I_706exp(:), I_728exp(:)
+      real(rprec), allocatable :: I_667(:), I_706(:), I_728(:)
+      real(rprec), allocatable :: dI_667exp(:), dI_706exp(:)
+      real(rprec), allocatable :: dI_728exp(:), radius(:)
+      real(rprec), allocatable :: TeRexp(:), NeRexp(:), TeNeRexp(:)
+      real(rprec), allocatable :: dTeRexp(:), dNeRexp(:), dTeNeRexp(:)
+      real(rprec), allocatable :: Te_exp(:), Ne_exp(:)
+      real(rprec), allocatable :: dTe_exp(:,:), dNe_exp(:,:)
+      real(rprec), allocatable :: Tet_exp(:), Net_exp(:)
+      real(rprec), allocatable :: dTet_exp(:,:), dNet_exp(:,:)
+      
+c-------------------------------------------------------------------------------
+c-- smoothing variables -------------------------------------------------------- 
+c-------------------------------------------------------------------------------
+      real(rprec) :: c(np), gi
+      integer(iprec) :: nl, nr
+      integer(iprec) :: flagx
+
+c-------------------------------------------------------------------------------
+c-- date and time variables ---------------------------------------------------- 
+c-------------------------------------------------------------------------------
+      character(len=8) :: date
+      character(len=10) :: time
+      character(len=5) :: zone
+      integer(iprec) :: values(8)
+
+c-------------------------------------------------------------------------------
+c  Data formats
+c-------------------------------------------------------------------------------	    
+100   format(1x,a9,3x,a6,6x,a6,9x,a4,7x,a9,6x,a4,9x,a4)
+110   format(1x,f8.6,1x,es12.6,1x,es12.6,1x,es12.6,1x,
+     &                      es12.6,1x,es12.6,1x,es12.6)
+120   format(1x,i3,2x,f9.4,2x,es12.5)
+
+c-------------------------------------------------------------------------------
+c  Data initialization
+c-------------------------------------------------------------------------------
+c-------------------------------------------------------------------------------
+c  Executes the program
+c-------------------------------------------------------------------------------
+      write(*,*)
+      write(*,*) '  Start of program'
+      write(*,*)
+      
+c-------------------------------------------------------------------------------
+c   Opens equilibrium data files
+c-------------------------------------------------------------------------------
+      ex = .false.
+      op = .false.
+      inquire(file='eqmodel/Te_Ratio.dat',exist=ex,opened=op)
+      if((ex .eqv. .true.).and.(op .eqv. .false.)) then
+         open(10,file='eqmodel/Te_Ratio.dat')   
+      else
+         write(*,*) 'ERROR, no Te_Ratio input file found'
+	 stop
+      endif	 
+
+      ex = .false.
+      op = .false.
+      inquire(file='eqmodel/Ne_Ratio.dat',exist=ex,opened=op)
+      if((ex .eqv. .true.).and.(op .eqv. .false.)) then
+         open(20,file='eqmodel/Ne_Ratio.dat')   
+      else
+         write(*,*) 'ERROR, no Ne_Ratio input file found'
+	 stop
+      endif	 
+
+      ex = .false.
+      op = .false.
+      inquire(file='eqmodel/TeNe_Ratio.dat',exist=ex,opened=op)
+      if((ex .eqv. .true.).and.(op .eqv. .false.)) then
+         open(30,file='eqmodel/TeNe_Ratio.dat')   
+      else
+         write(*,*) 'ERROR, no TeNe_Ratio input file found'
+	 stop
+      endif	 
+
+c-------------------------------------------------------------------------------
+c   Reads Te and Ne equilibrium data
+c-------------------------------------------------------------------------------
+      read(10,*) x, Ne(1:nNe)
+      do n = 1,nTe
+         read(10,*) Te(n), TeR(n,1:nNe)
+      enddo	 
+      close(10) 
+      
+      read(20,*)
+      do n = 1,nTe
+         read(20,*) x, NeR(n,1:nNe)
+      enddo	
+      close(20) 
+      
+      read(30,*)
+      do n = 1,nTe
+         read(30,*) x, TeNeR(n,1:nNe)
+      enddo	
+      close(30) 
+
+c-------------------------------------------------------------------------------
+c   Opens time dependent data files
+c-------------------------------------------------------------------------------
+      ex = .false.
+      op = .false.
+      inquire(file='tdmodel/Eigenval.dat',exist=ex,opened=op)
+      if((ex .eqv. .true.).and.(op .eqv. .false.)) then
+         open(40,file='tdmodel/Eigenval.dat')   
+      else
+         write(*,*) 'ERROR, no Eigenval input file found'
+	 stop
+      endif	 
+
+      ex = .false.
+      op = .false.
+      inquire(file='tdmodel/Recvec.dat',exist=ex,opened=op)
+      if((ex .eqv. .true.).and.(op .eqv. .false.)) then
+         open(50,file='tdmodel/Recvec.dat')   
+      else
+         write(*,*) 'ERROR, no Recvec input file found'
+	 stop
+      endif	 
+
+      ex = .false.
+      op = .false.
+      inquire(file='tdmodel/Vmtrx.dat',exist=ex,opened=op)
+      if((ex .eqv. .true.).and.(op .eqv. .false.)) then
+         open(60,file='tdmodel/Vmtrx.dat')   
+      else
+         write(*,*) 'ERROR, no Vmtrx input file found'
+	 stop
+      endif	 
+
+      ex = .false.
+      op = .false.
+      inquire(file='tdmodel/Vinv.dat',exist=ex,opened=op)
+      if((ex .eqv. .true.).and.(op .eqv. .false.)) then
+         open(70,file='tdmodel/Vinv.dat')   
+      else
+         write(*,*) 'ERROR, no Vinv input file found'
+	 stop
+      endif	 
+
+c-------------------------------------------------------------------------------
+c   Reads Te and Ne time dependent data
+c-------------------------------------------------------------------------------
+      read(40,*) x, Nein(1:nNet*nmtrx)
+      do i = 1,nNet
+         n = (i-1)*nmtrx + 1
+         Net(i) = Nein(n)
+      enddo
+           
+      do n = 1,nTet
+         read(40,*) Tet(n), Datain(1:nNet*nmtrx)
+	 do i = 1,nNet
+	    m = (i-1)*nmtrx
+	    do j = 1,nmtrx
+	       lamda(n,i,j) = Datain(m+j)
+	    enddo
+	 enddo
+      enddo	 
+      close(40)
+
+      read(50,*)
+      do n = 1,nTet
+         do k = 1,nmtrx 
+            read(50,*) x, Datain(1:nNet*nmtrx)
+	 
+	    do i = 1,nNet
+	       m = (i-1)*nmtrx
+	       do j = 1,nmtrx
+	          Rvect(n,i,k,j) = Datain(m+j)
+	       enddo
+	    enddo
+         enddo
+      enddo	 
+      close(50)
+
+      read(60,*)
+      do n = 1,nTet
+         do k = 1,nmtrx 
+            read(60,*) x, Datain(1:nNet*nmtrx)
+	 
+	    do i = 1,nNet
+	       m = (i-1)*nmtrx
+	       do j = 1,nmtrx
+	          VM(n,i,k,j) = Datain(m+j)
+	       enddo
+	    enddo
+         enddo
+      enddo	 
+      close(60)
+
+      read(70,*)
+      do n = 1,nTet
+         do k = 1,nmtrx 
+            read(70,*) x, Datain(1:nNet*nmtrx)
+	 
+	    do i = 1,nNet
+	       m = (i-1)*nmtrx
+	       do j = 1,nmtrx
+	          VI(n,i,k,j) = Datain(m+j)
+	       enddo
+	    enddo
+         enddo
+      enddo	 
+      close(70)
+
+c-------------------------------------------------------------------------------
+c  Reads experimental data and calculates experimental line ratios
+c-------------------------------------------------------------------------------
+      data_file = 'expdata/101401/HeInts.txt'
+c      data_file = 'expdata/102175/HeInts.txt'
+c      data_file = 'expdata/102118/HeInts.txt'
+c      data_file = 'expdata/101738/HeInts.txt'
+c      data_file = 'expdata/101818/HeInts.txt'
+c      data_file = 'expdata/101795/HeInts.txt'
+
+      ex = .false.
+      op = .false.
+      inquire(file=data_file,exist=ex,opened=op)
+      if((ex .eqv. .true.).and.(op .eqv. .false.)) then
+         open(80,file=data_file)   
+      else
+         write(*,*) 'ERROR, no ', data_file, 'input file found'
+	 stop
+      endif
+      
+      read(80,*)
+      read(80,*) nexp
+      
+      allocate(I_667exp(nexp),I_706exp(nexp),I_728exp(nexp))
+      allocate(I_667(nexp),I_706(nexp),I_728(nexp))
+      allocate(dI_667exp(nexp),dI_706exp(nexp),dI_728exp(nexp))
+      allocate(radius(nexp))
+      allocate(TeRexp(nexp),NeRexp(nexp),TeNeRexp(nexp))
+      allocate(dTeRexp(nexp),dNeRexp(nexp),dTeNeRexp(nexp)) 
+      allocate(Te_exp(nexp),Ne_exp(nexp))
+      allocate(dTe_exp(nexp,2),dNe_exp(nexp,2))
+      allocate(Tet_exp(nexp),Net_exp(nexp))
+      allocate(dTet_exp(nexp,2),dNet_exp(nexp,2))
+      
+      do i = 1,nexp
+         read(80,*) radius(i), I_667exp(i), I_706exp(i), I_728exp(i),  
+     &              dI_667exp(i), dI_706exp(i), dI_728exp(i)
+         radius(i) = abs(radius(i))
+	 I_667exp(i) = abs(I_667exp(i))
+	 I_706exp(i) = abs(I_706exp(i))
+	 I_728exp(i) = abs(I_728exp(i))
+	 dI_667exp(i) = abs(dI_667exp(i))
+	 dI_706exp(i) = abs(dI_706exp(i))
+	 dI_728exp(i) = abs(dI_728exp(i))
+
+         TeRexp(i) = I_706exp(i)/I_728exp(i)
+         NeRexp(i) = I_667exp(i)/I_728exp(i)
+	 TeNeRexp(i) = I_706exp(i)/I_667exp(i)
+
+         dTeRexp(i) = TeRexp(i)*dsqrt((dI_706exp(i)/I_706exp(i))**2 +
+     &                                (dI_728exp(i)/I_728exp(i))**2)
+         dNeRexp(i) = NeRexp(i)*dsqrt((dI_667exp(i)/I_667exp(i))**2 +
+     &                               (dI_728exp(i)/I_728exp(i))**2)
+         dTeNeRexp(i) = TeNeRexp(i)*
+     &	                dsqrt((dI_706exp(i)/I_706exp(i))**2 +
+     &                        (dI_667exp(i)/I_667exp(i))**2)
+
+      enddo
+      
+      close(80)
+
+c-------------------------------------------------------------------------------
+c  Smooths the experimental data by using Savitzky-Golay coefficients
+c-------------------------------------------------------------------------------
+      if(smth .eqv. .true.) then
+         flagx = 0
+         do n = 1,nexp      
+            if(n .le. np/2_iprec) then
+	       nl = n-1
+	       if(nl .lt. 0) then
+	          nl = 0
+	       endif
+	       nr = np-nl-1
+	       call savgol(c,np,nl,nr,ld,mp)
+	    elseif((nexp-n) .le. np/2_iprec) then
+	       nr = np/2_iprec-(nexp-n)
+	       nl = np-nr-1
+	       call savgol(c,np,nl,nr,ld,mp)
+	    else
+	       nr = np/2_iprec
+	       nl = np/2_iprec
+	       if(flagx .eq. 0) then
+	          call savgol(c,np,nl,nr,ld,mp)
+	          flagx = 1	    
+	       endif
+	    endif
+	  
+	    gi = 0.0_rprec
+	    do i = 1,nl+1
+	       j = n-i+1
+	       gi = gi + c(i)*I_667exp(j)
+	    enddo
+	    k = 0
+	    do i = nl+2,np
+	       j = n+nr-k
+	       gi = gi + c(i)*I_667exp(j)
+	       k = k + 1
+	    enddo
+	    I_667(n) = gi       
+      
+	    gi = 0.0_rprec
+	    do i = 1,nl+1
+	       j = n-i+1
+	       gi = gi + c(i)*I_706exp(j)
+	    enddo
+	    k = 0
+	    do i = nl+2,np
+	       j = n+nr-k
+	       gi = gi + c(i)*I_706exp(j)
+	       k = k + 1
+	    enddo
+	    I_706(n) = gi       
+
+	    gi = 0.0_rprec
+	    do i = 1,nl+1
+	       j = n-i+1
+	       gi = gi + c(i)*I_728exp(j)
+	    enddo
+	    k = 0
+	    do i = nl+2,np
+	       j = n+nr-k
+	       gi = gi + c(i)*I_728exp(j)
+	       k = k + 1
+	    enddo
+	    I_728(n) = gi       
+      
+            TeRexp(n) = I_706(n)/I_728(n)
+            NeRexp(n) = I_667(n)/I_728(n)
+	    TeNeRexp(n) = I_706(n)/I_667(n)	 	 	 
+         enddo
+      endif
+      
+c-------------------------------------------------------------------------------
+c  Calculates the experimental Te and Ne values using the equilibrium model
+c-------------------------------------------------------------------------------
+      do n = 1,nexp
+         min = infinity
+	 min_p = infinity
+	 min_m = infinity
+
+         do ntemp = 2,nTe-1
+	    do ndens = 2,nNe-1
+               dTeRtot = dsqrt((dTeRm*TeR(ntemp,ndens))**2 +
+     &	                                       dTeRexp(n)**2) 	       
+               dNeRtot = dsqrt((dNeRm*NeR(ntemp,ndens))**2 +
+     &	                                       dNeRexp(n)**2) 	       
+               dTeNeRtot = dsqrt((dTeNeRm*TeNeR(ntemp,ndens))**2 +
+     &	                                           dTeNeRexp(n)**2) 	       
+	      
+               chisqrt = (1.0_rprec-TeRexp(n)/TeR(ntemp,ndens))**2 +  
+     &                   (1.0_rprec-NeRexp(n)/NeR(ntemp,ndens))**2 +
+     &                   (1.0_rprec-TeNeRexp(n)/TeNeR(ntemp,ndens))**2
+               if(chisqrt .lt. min) then
+	          min = chisqrt
+		  indx_Te = ntemp
+		  indx_Ne = ndens
+	       endif
+	       
+               chisq_p = (1.0_rprec-(TeRexp(n)+dTeRtot)/ 
+     &	                            TeR(ntemp,ndens))**2 +  
+     &                   (1.0_rprec-(NeRexp(n)+dNeRtot)/ 
+     &                              NeR(ntemp,ndens))**2 +
+     &                   (1.0_rprec-(TeNeRexp(n)+dTeNeRtot)/ 
+     &                              TeNeR(ntemp,ndens))**2
+               if(chisq_p .lt. min_p) then
+	          min_p = chisq_p
+		  indx_Tep = ntemp
+		  indx_Nep = ndens
+	       endif
+
+               chisq_m = (1.0_rprec-(TeRexp(n)-dTeRtot)/ 
+     &	                            TeR(ntemp,ndens))**2 +  
+     &                   (1.0_rprec-(NeRexp(n)-dNeRtot)/ 
+     &                              NeR(ntemp,ndens))**2 +
+     &                   (1.0_rprec-(TeNeRexp(n)-dTeNeRtot)/ 
+     &                              TeNeR(ntemp,ndens))**2
+               if(chisq_m .lt. min_m) then
+	          min_m = chisq_m
+		  indx_Tem = ntemp
+		  indx_Nem = ndens
+	       endif
+            enddo
+	 enddo
+	 
+c-------------------------------------------------------------------------------
+c  Interpolates the Te and Ne values using the equilibrium model
+c-------------------------------------------------------------------------------
+         Xvec(1) = Te(indx_Te+1) - Te(indx_Te-1)
+         Xvec(2) = 0.0_rprec
+         Xvec(3) = dlog10(intpar*TeR(indx_Te+1,indx_Ne))- 
+     &             dlog10(intpar*TeR(indx_Te-1,indx_Ne))
+
+         Yvec(1) = 0.0_rprec
+         Yvec(2) = dlog10(Ne(indx_Ne+1)) - dlog10(Ne(indx_Ne-1))
+         Yvec(3) = dlog10(intpar*TeR(indx_Te,indx_Ne+1))- 
+     &             dlog10(intpar*TeR(indx_Te,indx_Ne-1))
+
+         Vn1(1) = Xvec(2)*Yvec(3) - Xvec(3)*Yvec(2)
+         Vn1(2) = Xvec(3)*Yvec(1) - Xvec(1)*Yvec(3)
+         Vn1(3) = Xvec(1)*Yvec(2) - Xvec(2)*Yvec(1)
+
+         Vmag = dsqrt(Vn1(1)**2 + Vn1(2)**2 + Vn1(3)**2)
+         Vn1(1:3) = Vn1(1:3)/Vmag 
+
+         Xvec(1) = Te(indx_Te+1) - Te(indx_Te-1)
+         Xvec(2) = 0.0_rprec
+         Xvec(3) = dlog10(intpar*NeR(indx_Te+1,indx_Ne))- 
+     &             dlog10(intpar*NeR(indx_Te-1,indx_Ne))
+
+         Yvec(1) = 0.0_rprec
+         Yvec(2) = dlog10(Ne(indx_Ne+1)) - dlog10(Ne(indx_Ne-1))
+         Yvec(3) = dlog10(intpar*NeR(indx_Te,indx_Ne+1))- 
+     &             dlog10(intpar*NeR(indx_Te,indx_Ne-1))
+
+         Vn2(1) = Xvec(2)*Yvec(3) - Xvec(3)*Yvec(2)
+         Vn2(2) = Xvec(3)*Yvec(1) - Xvec(1)*Yvec(3)
+         Vn2(3) = Xvec(1)*Yvec(2) - Xvec(2)*Yvec(1)
+
+         Vmag = dsqrt(Vn2(1)**2 + Vn2(2)**2 + Vn2(3)**2)
+         Vn2(1:3) = Vn2(1:3)/Vmag 
+
+         K1 = Vn1(3)*(dlog10(intpar*TeRexp(n))-  
+     &                dlog10(intpar*TeR(indx_Te,indx_Ne)))
+         K2 = Vn2(3)*(dlog10(intpar*NeRexp(n))-  
+     &                dlog10(intpar*NeR(indx_Te,indx_Ne)))
+
+
+         Te_exp(n) = (Vn1(2)*K2/Vn2(2)-K1)/
+     &	             (Vn1(1)-Vn1(2)*Vn2(1)/Vn2(2))+ 
+     &               Te(indx_Te) 
+
+         Ne_exp(n) = -(Vn2(1)*(Te_exp(n)-Te(indx_Te))+K2)/Vn2(2)+ 
+     &               dlog10(Ne(indx_Ne))
+         Ne_exp(n) = (10.0e+0_rprec)**Ne_exp(n)		  		  
+
+         Te_exp(n) = abs(Te_exp(n))
+         Ne_exp(n) = abs(Ne_exp(n))
+
+         if(Te_exp(n) .gt. Te(nTe)) then
+            Te_exp(n) = Te(nTe)
+         endif
+         if(Te_exp(n) .lt. Te(1)) then
+            Te_exp(n) = Te(1)
+         endif
+
+         if(Ne_exp(n) .gt. Ne(nNe)) then
+            Ne_exp(n) = Ne(nNe)
+         endif
+         if(Ne_exp(n) .lt. Ne(1)) then
+            Ne_exp(n) = Ne(1)
+         endif
+	 
+	 write(*,120) n, Te_exp(n), Ne_exp(n)
+	
+c-------------------------------------------------------------------------------
+c  Interpolates the Te and Ne uncertainty values using the equilibrium model
+c-------------------------------------------------------------------------------
+         dTeRtot = dsqrt((dTeRm*TeR(indx_Tep,indx_Nep))**2 +
+     &	                                       dTeRexp(n)**2) 	       
+         dNeRtot = dsqrt((dNeRm*NeR(indx_Tep,indx_Nep))**2 +
+     &	                                       dNeRexp(n)**2) 	       
+         dTeNeRtot = dsqrt((dTeNeRm*TeNeR(indx_Tep,indx_Nep))**2 +
+     &	                                           dTeNeRexp(n)**2) 	       
+
+         Xvec(1) = Te(indx_Tep+1) - Te(indx_Tep-1)
+         Xvec(2) = 0.0e+0_rprec
+         Xvec(3) = dlog10(intpar*TeR(indx_Tep+1,indx_Nep))- 
+     &             dlog10(intpar*TeR(indx_Tep-1,indx_Nep))
+
+         Yvec(1) = 0.0_rprec
+         Yvec(2) = dlog10(Ne(indx_Nep+1)) - dlog10(Ne(indx_Nep-1))
+         Yvec(3) = dlog10(intpar*TeR(indx_Tep,indx_Nep+1))- 
+     &             dlog10(intpar*TeR(indx_Tep,indx_Nep-1))
+
+         Vn1(1) = Xvec(2)*Yvec(3) - Xvec(3)*Yvec(2)
+         Vn1(2) = Xvec(3)*Yvec(1) - Xvec(1)*Yvec(3)
+         Vn1(3) = Xvec(1)*Yvec(2) - Xvec(2)*Yvec(1)
+
+         Vmag = dsqrt(Vn1(1)**2 + Vn1(2)**2 + Vn1(3)**2)
+         Vn1(1:3) = Vn1(1:3)/Vmag 
+
+         Xvec(1) = Te(indx_Tep+1) - Te(indx_Tep-1)
+         Xvec(2) = 0.0_rprec
+         Xvec(3) = dlog10(intpar*NeR(indx_Tep+1,indx_Nep))- 
+     &             dlog10(intpar*NeR(indx_Tep-1,indx_Nep))
+
+         Yvec(1) = 0.0_rprec
+         Yvec(2) = dlog10(Ne(indx_Nep+1)) - dlog10(Ne(indx_Nep-1))
+         Yvec(3) = dlog10(intpar*NeR(indx_Tep,indx_Nep+1))- 
+     &             dlog10(intpar*NeR(indx_Tep,indx_Nep-1))
+
+         Vn2(1) = Xvec(2)*Yvec(3) - Xvec(3)*Yvec(2)
+         Vn2(2) = Xvec(3)*Yvec(1) - Xvec(1)*Yvec(3)
+         Vn2(3) = Xvec(1)*Yvec(2) - Xvec(2)*Yvec(1)
+
+         Vmag = dsqrt(Vn2(1)**2 + Vn2(2)**2 + Vn2(3)**2)
+         Vn2(1:3) = Vn2(1:3)/Vmag 
+
+         K1 = Vn1(3)*(dlog10(intpar*(TeRexp(n)+dTeRtot))-  
+     &                dlog10(intpar*TeR(indx_Tep,indx_Nep)))
+         K2 = Vn2(3)*(dlog10(intpar*(NeRexp(n)+dNeRtot))-  
+     &                dlog10(intpar*NeR(indx_Tep,indx_Nep)))
+
+
+         dTe_exp(n,2) = (Vn1(2)*K2/Vn2(2)-K1)/
+     &	                (Vn1(1)-Vn1(2)*Vn2(1)/Vn2(2))+ 
+     &                  Te(indx_Tep) 
+
+         dNe_exp(n,1) = -(Vn2(1)*(dTe_exp(n,2)-Te(indx_Tep))+K2)/Vn2(2)+ 
+     &                  dlog10(Ne(indx_Nep))
+         dNe_exp(n,1) = (10.0e+0_rprec)**dNe_exp(n,1)		  		  
+
+         dTe_exp(n,2) = abs(dTe_exp(n,2))
+         dNe_exp(n,1) = abs(dNe_exp(n,1))
+
+         if(dTe_exp(n,2) .gt. Te(nTe)) then
+            dTe_exp(n,2) = Te(nTe)
+         endif
+         if(dTe_exp(n,2) .lt. Te(1)) then
+            dTe_exp(n,2) = Te(1)
+         endif
+
+         if(dNe_exp(n,1) .gt. Ne(nNe)) then
+            dNe_exp(n,1) = Ne(nNe)
+         endif
+         if(dNe_exp(n,1) .lt. Ne(1)) then
+            dNe_exp(n,1) = Ne(1)
+         endif
+
+         dTe_exp(n,2) = abs(Te_exp(n)-dTe_exp(n,2))
+         dNe_exp(n,1) = abs(Ne_exp(n)-dNe_exp(n,1))
+
+	 if(isnan(dTe_exp(n,2))) then
+	    dTe_exp(n,2) = 0.0_rprec
+	 endif    
+	 if(isnan(dNe_exp(n,1))) then
+	    dNe_exp(n,1) = 0.0_rprec
+	 endif    
+
+c-------------------------------------------------------------------------------
+         dTeRtot = dsqrt((dTeRm*TeR(indx_Tem,indx_Nem))**2 +
+     &	                                       dTeRexp(n)**2) 	       
+         dNeRtot = dsqrt((dNeRm*NeR(indx_Tem,indx_Nem))**2 +
+     &	                                       dNeRexp(n)**2) 	       
+         dTeNeRtot = dsqrt((dTeNeRm*TeNeR(indx_Tem,indx_Nem))**2 +
+     &	                                           dTeNeRexp(n)**2) 	       
+
+         Xvec(1) = Te(indx_Tem+1) - Te(indx_Tem-1)
+         Xvec(2) = 0.0_rprec
+         Xvec(3) = dlog10(intpar*TeR(indx_Tem+1,indx_Nem))- 
+     &             dlog10(intpar*TeR(indx_Tem-1,indx_Nem))
+
+         Yvec(1) = 0.0_rprec
+         Yvec(2) = dlog10(Ne(indx_Nem+1)) - dlog10(Ne(indx_Nem-1))
+         Yvec(3) = dlog10(intpar*TeR(indx_Tem,indx_Nem+1))- 
+     &             dlog10(intpar*TeR(indx_Tem,indx_Nem-1))
+
+         Vn1(1) = Xvec(2)*Yvec(3) - Xvec(3)*Yvec(2)
+         Vn1(2) = Xvec(3)*Yvec(1) - Xvec(1)*Yvec(3)
+         Vn1(3) = Xvec(1)*Yvec(2) - Xvec(2)*Yvec(1)
+
+         Vmag = dsqrt(Vn1(1)**2 + Vn1(2)**2 + Vn1(3)**2)
+         Vn1(1:3) = Vn1(1:3)/Vmag 
+
+         Xvec(1) = Te(indx_Tem+1) - Te(indx_Tem-1)
+         Xvec(2) = 0.0_rprec
+         Xvec(3) = dlog10(intpar*NeR(indx_Tem+1,indx_Nem))- 
+     &             dlog10(intpar*NeR(indx_Tem-1,indx_Nem))
+
+         Yvec(1) = 0.0_rprec
+         Yvec(2) = dlog10(Ne(indx_Nem+1)) - dlog10(Ne(indx_Nem-1))
+         Yvec(3) = dlog10(intpar*NeR(indx_Tem,indx_Nem+1))- 
+     &             dlog10(intpar*NeR(indx_Tem,indx_Nem-1))
+
+         Vn2(1) = Xvec(2)*Yvec(3) - Xvec(3)*Yvec(2)
+         Vn2(2) = Xvec(3)*Yvec(1) - Xvec(1)*Yvec(3)
+         Vn2(3) = Xvec(1)*Yvec(2) - Xvec(2)*Yvec(1)
+
+         Vmag = dsqrt(Vn2(1)**2 + Vn2(2)**2 + Vn2(3)**2)
+         Vn2(1:3) = Vn2(1:3)/Vmag 
+
+         K1 = Vn1(3)*(dlog10(intpar*(TeRexp(n)-dTeRtot))-  
+     &                dlog10(intpar*TeR(indx_Tem,indx_Nem)))
+         K2 = Vn2(3)*(dlog10(intpar*(NeRexp(n)-dNeRtot))-  
+     &                dlog10(intpar*NeR(indx_Tem,indx_Nem)))
+
+
+         dTe_exp(n,1) = (Vn1(2)*K2/Vn2(2)-K1)/
+     &	                (Vn1(1)-Vn1(2)*Vn2(1)/Vn2(2))+ 
+     &                  Te(indx_Tem) 
+
+         dNe_exp(n,2) = -(Vn2(1)*(dTe_exp(n,1)-Te(indx_Tem))+K2)/Vn2(2)+ 
+     &                  dlog10(Ne(indx_Nem))
+         dNe_exp(n,2) = (10.0e+0_rprec)**dNe_exp(n,2)		  		  
+
+         dTe_exp(n,1) = abs(dTe_exp(n,1))
+         dNe_exp(n,2) = abs(dNe_exp(n,2))
+
+         if(dTe_exp(n,1) .gt. Te(nTe)) then
+            dTe_exp(n,1) = Te(nTe)
+         endif
+         if(dTe_exp(n,1) .lt. Te(1)) then
+            dTe_exp(n,1) = Te(1)
+         endif
+
+         if(dNe_exp(n,2) .gt. Ne(nNe)) then
+            dNe_exp(n,2) = Ne(nNe)
+         endif
+         if(dNe_exp(n,2) .lt. Ne(1)) then
+            dNe_exp(n,2) = Ne(1)
+         endif
+
+         dTe_exp(n,1) = abs(Te_exp(n)-dTe_exp(n,1))
+         dNe_exp(n,2) = abs(Ne_exp(n)-dNe_exp(n,2))
+	 
+	 if(isnan(dTe_exp(n,1))) then
+	    dTe_exp(n,1) = 0.0_rprec
+	 endif    
+	 if(isnan(dNe_exp(n,2))) then
+	    dNe_exp(n,2) = 0.0_rprec
+	 endif    
+
+      enddo
+      	 
+c-------------------------------------------------------------------------------
+c  Sets the initial values of the populations for the time dependent solution
+c-------------------------------------------------------------------------------
+      No(1:nmtrx) = Noi(1:nmtrx)
+      ri = ro
+      chi_te_ne_o = infinity
+      
+      do n = 1,nexp
+      
+         t = abs(ri-radius(n))/vb	 
+         do ntemp = 1,nTet
+            do ndens = 1,nNet
+c-------------------------------------------------------------------------------
+c  Calculates the analytical time dependent solutions
+c-------------------------------------------------------------------------------      
+               exps(1:nmtrx) = lamda(ntemp,ndens,1:nmtrx)
+	       recv(1:nmtrx,1:nmtrx) = 
+     &	                            Rvect(ntemp,ndens,1:nmtrx,1:nmtrx) 
+	       VRmtr(1:nmtrx,1:nmtrx) = VM(ntemp,ndens,1:nmtrx,1:nmtrx) 
+	       VRinv(1:nmtrx,1:nmtrx) = VI(ntemp,ndens,1:nmtrx,1:nmtrx) 
+            
+               Xv(1:nmtrx) = 0.0_rprec
+	       do i = 1,nmtrx
+	          do j = 1,nmtrx
+	             Xv(i) = Xv(i) + VRinv(i,j)*No(j)
+	          enddo
+	       enddo
+
+               Yv(:,:) = 0.0_rprec
+               do i = 1,nmtrx
+	          do j = 1,nmtrx
+	             Yv(i,j) = VRmtr(i,j)*Xv(j) + recv(i,j) 
+	          enddo
+	       enddo
+	    
+	       Nt(1:nmtrx,ntemp,ndens) = 0.0_rprec
+               do i = 1,nmtrx
+                  do j = 1,nmtrx
+	             Nt(i,ntemp,ndens) = Nt(i,ntemp,ndens) + 
+     &		                    Yv(i,j)*dexp(exps(j)*t) - recv(i,j)
+                  enddo
+               enddo
+	    
+c-------------------------------------------------------------------------------
+c  Computes the line intensities and line ratios
+c-------------------------------------------------------------------------------      
+               I_667_99 = Nt(10,ntemp,ndens) * Aij_667_99 * 
+     &	                  wt_1s_3d_1D2 / totwt_1s_3d_1D 
+               I_668_15 = Nt(9,ntemp,ndens) * Aij_668_15 * 
+     &	                  wt_1s_3d_3D2 / totwt_1s_3d_3D 
+               I_706_71 = Nt(6,ntemp,ndens) * Aij_706_71 * 
+     &	                  wt_1s_3s_3S1 / totwt_1s_3s_3S
+               I_706_72 = Nt(6,ntemp,ndens) * Aij_706_72 * 
+     &	                  wt_1s_3s_3S1 / totwt_1s_3s_3S
+               I_706_77 = Nt(6,ntemp,ndens) * Aij_706_77 * 
+     &	                  wt_1s_3s_3S1 / totwt_1s_3s_3S
+               I_728_34 = Nt(7,ntemp,ndens) * Aij_728_34 * 
+     &	                  wt_1s_3s_1S0 / totwt_1s_3s_1S
+
+	       TeRt(ntemp,ndens) = (I_706_71+I_706_72+I_706_77) / 
+     &	                           I_728_34
+	       NeRt(ntemp,ndens) = (I_667_99+I_668_15)/I_728_34
+	       TeNeRt(ntemp,ndens) = (I_706_71+I_706_72+I_706_77) / 
+     &	                             (I_667_99+I_668_15)
+     	      	       	  
+            enddo
+         enddo
+
+         min = infinity
+	 min_p = infinity
+	 min_m = infinity
+
+         do ntemp = 2,nTet-1
+	    do ndens = 2,nNet-1
+               dTeRtot = dsqrt((dTeRm*TeRt(ntemp,ndens))**2 +
+     &	                                       dTeRexp(n)**2) 	       
+               dNeRtot = dsqrt((dNeRm*NeRt(ntemp,ndens))**2 +
+     &	                                       dNeRexp(n)**2) 	       
+               dTeNeRtot = dsqrt((dTeNeRm*TeNeRt(ntemp,ndens))**2 +
+     &	                                           dTeNeRexp(n)**2) 	       
+	      
+               chisqrt = (1.0_rprec-TeRexp(n)/TeRt(ntemp,ndens))**2 +  
+     &                   (1.0_rprec-NeRexp(n)/NeRt(ntemp,ndens))**2 +
+     &                   (1.0_rprec-TeNeRexp(n)/TeNeRt(ntemp,ndens))**2
+               if(chisqrt .lt. min) then
+	          min = chisqrt
+		  indx_Te = ntemp
+		  indx_Ne = ndens
+	       endif
+	       
+               chisq_p = (1.0_rprec-(TeRexp(n)+dTeRtot) / 
+     &	                            TeRt(ntemp,ndens))**2 +  
+     &                   (1.0_rprec-(NeRexp(n)+dNeRtot) / 
+     &                              NeRt(ntemp,ndens))**2 +
+     &                   (1.0_rprec-(TeNeRexp(n)+dTeNeRtot) / 
+     &                              TeNeRt(ntemp,ndens))**2
+               if(chisq_p .lt. min_p) then
+	          min_p = chisq_p
+		  indx_Tep = ntemp
+		  indx_Nep = ndens
+	       endif
+
+               chisq_m = (1.0_rprec-(TeRexp(n)-dTeRtot) / 
+     &	                            TeRt(ntemp,ndens))**2 +  
+     &                   (1.0_rprec-(NeRexp(n)-dNeRtot) / 
+     &                              NeRt(ntemp,ndens))**2 +
+     &                   (1.0_rprec-(TeNeRexp(n)-dTeNeRtot) / 
+     &                              TeNeRt(ntemp,ndens))**2
+               if(chisq_m .lt. min_m) then
+	          min_m = chisq_m
+		  indx_Tem = ntemp
+		  indx_Nem = ndens
+	       endif
+            enddo
+	 enddo
+	 
+	 ri = radius(n)
+
+c-------------------------------------------------------------------------------
+c  Interpolates the Te and Ne values using the time dependent model
+c-------------------------------------------------------------------------------
+         Xvec(1) = Tet(indx_Te+1) - Tet(indx_Te-1)
+         Xvec(2) = 0.0_rprec
+         Xvec(3) = dlog10(intpar*TeRt(indx_Te+1,indx_Ne))- 
+     &             dlog10(intpar*TeRt(indx_Te-1,indx_Ne))
+
+         Yvec(1) = 0.0_rprec
+         Yvec(2) = dlog10(Net(indx_Ne+1)) - dlog10(Net(indx_Ne-1))
+         Yvec(3) = dlog10(intpar*TeRt(indx_Te,indx_Ne+1))- 
+     &             dlog10(intpar*TeRt(indx_Te,indx_Ne-1))
+
+         Vn1(1) = Xvec(2)*Yvec(3) - Xvec(3)*Yvec(2)
+         Vn1(2) = Xvec(3)*Yvec(1) - Xvec(1)*Yvec(3)
+         Vn1(3) = Xvec(1)*Yvec(2) - Xvec(2)*Yvec(1)
+
+         Vmag = dsqrt(Vn1(1)**2 + Vn1(2)**2 + Vn1(3)**2)
+         Vn1(1:3) = Vn1(1:3)/Vmag 
+
+         Xvec(1) = Tet(indx_Te+1) - Tet(indx_Te-1)
+         Xvec(2) = 0.0_rprec
+         Xvec(3) = dlog10(intpar*NeRt(indx_Te+1,indx_Ne))- 
+     &             dlog10(intpar*NeRt(indx_Te-1,indx_Ne))
+
+         Yvec(1) = 0.0_rprec
+         Yvec(2) = dlog10(Net(indx_Ne+1)) - dlog10(Net(indx_Ne-1))
+         Yvec(3) = dlog10(intpar*NeRt(indx_Te,indx_Ne+1))- 
+     &             dlog10(intpar*NeRt(indx_Te,indx_Ne-1))
+
+         Vn2(1) = Xvec(2)*Yvec(3) - Xvec(3)*Yvec(2)
+         Vn2(2) = Xvec(3)*Yvec(1) - Xvec(1)*Yvec(3)
+         Vn2(3) = Xvec(1)*Yvec(2) - Xvec(2)*Yvec(1)
+
+         Vmag = dsqrt(Vn2(1)**2 + Vn2(2)**2 + Vn2(3)**2)
+         Vn2(1:3) = Vn2(1:3)/Vmag 
+
+         K1 = Vn1(3)*(dlog10(intpar*TeRexp(n))-  
+     &                dlog10(intpar*TeRt(indx_Te,indx_Ne)))
+         K2 = Vn2(3)*(dlog10(intpar*NeRexp(n))-  
+     &                dlog10(intpar*NeRt(indx_Te,indx_Ne)))
+
+
+         Tet_exp(n) = (Vn1(2)*K2/Vn2(2)-K1)/
+     &	              (Vn1(1)-Vn1(2)*Vn2(1)/Vn2(2))+ 
+     &                Tet(indx_Te) 
+
+         Net_exp(n) = -(Vn2(1)*(Tet_exp(n)-Tet(indx_Te))+K2)/Vn2(2)+ 
+     &                dlog10(Net(indx_Ne))
+         Net_exp(n) = (10.0e+0_rprec)**Net_exp(n)		  		  
+
+         Tet_exp(n) = abs(Tet_exp(n))
+         Net_exp(n) = abs(Net_exp(n))
+
+         if(Tet_exp(n) .gt. Tet(nTet)) then
+            Tet_exp(n) = Tet(nTet)
+	    indx_Te = nTet
+         endif
+         if((Tet_exp(n) .lt. Tet(1)) .or. (isnan(Tet_exp(n)))) then
+            Tet_exp(n) = Tet(1)
+	    indx_Te = 1
+         endif
+
+         if(Net_exp(n) .gt. Net(nNet)) then
+            Net_exp(n) = Net(nNet)
+	    indx_Ne = nNet
+         endif
+         if((Net_exp(n) .lt. Net(1)) .or. (isnan(Net_exp(n)))) then
+            Net_exp(n) = Net(1)
+	    indx_Ne = 1
+         endif
+	 
+c-------------------------------------------------------------------------------      
+	 write(*,120) n, Tet_exp(n), Net_exp(n)
+	 No(1:nmtrx) = Nt(1:nmtrx,indx_Te,indx_Ne)
+	
+c-------------------------------------------------------------------------------
+c  Interpolates the Te and Ne uncertainty values using the time dependent model
+c-------------------------------------------------------------------------------
+         dTeRtot = dsqrt((dTeRm*TeRt(indx_Tep,indx_Nep))**2 +
+     &	                                        dTeRexp(n)**2) 	       
+         dNeRtot = dsqrt((dNeRm*NeRt(indx_Tep,indx_Nep))**2 +
+     &	                                        dNeRexp(n)**2) 	       
+         dTeNeRtot = dsqrt((dTeNeRm*TeNeRt(indx_Tep,indx_Nep))**2 +
+     &	                                            dTeNeRexp(n)**2) 	       
+
+         Xvec(1) = Tet(indx_Tep+1) - Tet(indx_Tep-1)
+         Xvec(2) = 0.0_rprec
+         Xvec(3) = dlog10(intpar*TeRt(indx_Tep+1,indx_Nep)) - 
+     &             dlog10(intpar*TeRt(indx_Tep-1,indx_Nep))
+
+         Yvec(1) = 0.0_rprec
+         Yvec(2) = dlog10(Net(indx_Nep+1)) - dlog10(Net(indx_Nep-1))
+         Yvec(3) = dlog10(intpar*TeRt(indx_Tep,indx_Nep+1)) - 
+     &             dlog10(intpar*TeRt(indx_Tep,indx_Nep-1))
+
+         Vn1(1) = Xvec(2)*Yvec(3) - Xvec(3)*Yvec(2)
+         Vn1(2) = Xvec(3)*Yvec(1) - Xvec(1)*Yvec(3)
+         Vn1(3) = Xvec(1)*Yvec(2) - Xvec(2)*Yvec(1)
+
+         Vmag = dsqrt(Vn1(1)**2 + Vn1(2)**2 + Vn1(3)**2)
+         Vn1(1:3) = Vn1(1:3)/Vmag 
+
+         Xvec(1) = Tet(indx_Tep+1) - Tet(indx_Tep-1)
+         Xvec(2) = 0.0_rprec
+         Xvec(3) = dlog10(intpar*NeRt(indx_Tep+1,indx_Nep)) - 
+     &             dlog10(intpar*NeRt(indx_Tep-1,indx_Nep))
+
+         Yvec(1) = 0.0_rprec
+         Yvec(2) = dlog10(Net(indx_Nep+1)) - dlog10(Net(indx_Nep-1))
+         Yvec(3) = dlog10(intpar*NeRt(indx_Tep,indx_Nep+1)) - 
+     &             dlog10(intpar*NeRt(indx_Tep,indx_Nep-1))
+
+         Vn2(1) = Xvec(2)*Yvec(3) - Xvec(3)*Yvec(2)
+         Vn2(2) = Xvec(3)*Yvec(1) - Xvec(1)*Yvec(3)
+         Vn2(3) = Xvec(1)*Yvec(2) - Xvec(2)*Yvec(1)
+
+         Vmag = dsqrt(Vn2(1)**2 + Vn2(2)**2 + Vn2(3)**2)
+         Vn2(1:3) = Vn2(1:3)/Vmag 
+
+         K1 = Vn1(3)*(dlog10(intpar*(TeRexp(n)+dTeRtot)) -  
+     &                dlog10(intpar*TeRt(indx_Tep,indx_Nep)))
+         K2 = Vn2(3)*(dlog10(intpar*(NeRexp(n)+dNeRtot)) -  
+     &                dlog10(intpar*NeRt(indx_Tep,indx_Nep)))
+
+
+         dTet_exp(n,2) = (Vn1(2)*K2/Vn2(2)-K1)/
+     &	                 (Vn1(1)-Vn1(2)*Vn2(1)/Vn2(2)) + 
+     &                   Tet(indx_Tep) 
+
+         dNet_exp(n,1) = -(Vn2(1)*(dTet_exp(n,2) - 
+     &	                   Tet(indx_Tep))+K2)/Vn2(2) + 
+     &                   dlog10(Net(indx_Nep))
+         dNet_exp(n,1) = (10.0e+0_rprec)**dNet_exp(n,1)		  		  
+
+         dTet_exp(n,2) = abs(dTet_exp(n,2))
+         dNet_exp(n,1) = abs(dNet_exp(n,1))
+
+         if(dTet_exp(n,2) .gt. Tet(nTet)) then
+            dTet_exp(n,2) = Te(nTet)
+         endif
+         if(dTet_exp(n,2) .lt. Tet(1)) then
+            dTet_exp(n,2) = Tet(1)
+         endif
+
+         if(dNet_exp(n,1) .gt. Net(nNet)) then
+            dNet_exp(n,1) = Net(nNet)
+         endif
+         if(dNet_exp(n,1) .lt. Net(1)) then
+            dNet_exp(n,1) = Net(1)
+         endif
+
+         dTet_exp(n,2) = abs(Tet_exp(n)-dTet_exp(n,2))
+         dNet_exp(n,1) = abs(Net_exp(n)-dNet_exp(n,1))
+
+	 if(isnan(dTet_exp(n,2))) then
+	    dTet_exp(n,2) = 0.0_rprec
+	 endif    
+	 if(isnan(dNet_exp(n,1))) then
+	    dNet_exp(n,1) = 0.0_rprec
+	 endif    
+
+c-------------------------------------------------------------------------------
+         dTeRtot = dsqrt((dTeRm*TeRt(indx_Tem,indx_Nem))**2 +
+     &	                                        dTeRexp(n)**2) 	       
+         dNeRtot = dsqrt((dNeRm*NeRt(indx_Tem,indx_Nem))**2 +
+     &	                                        dNeRexp(n)**2) 	       
+         dTeNeRtot = dsqrt((dTeNeRm*TeNeRt(indx_Tem,indx_Nem))**2 +
+     &	                                            dTeNeRexp(n)**2) 	       
+
+         Xvec(1) = Tet(indx_Tem+1) - Tet(indx_Tem-1)
+         Xvec(2) = 0.0_rprec
+         Xvec(3) = dlog10(intpar*TeRt(indx_Tem+1,indx_Nem))- 
+     &             dlog10(intpar*TeRt(indx_Tem-1,indx_Nem))
+
+         Yvec(1) = 0.0_rprec
+         Yvec(2) = dlog10(Net(indx_Nem+1)) - dlog10(Net(indx_Nem-1))
+         Yvec(3) = dlog10(intpar*TeRt(indx_Tem,indx_Nem+1))- 
+     &             dlog10(intpar*TeRt(indx_Tem,indx_Nem-1))
+
+         Vn1(1) = Xvec(2)*Yvec(3) - Xvec(3)*Yvec(2)
+         Vn1(2) = Xvec(3)*Yvec(1) - Xvec(1)*Yvec(3)
+         Vn1(3) = Xvec(1)*Yvec(2) - Xvec(2)*Yvec(1)
+
+         Vmag = dsqrt(Vn1(1)**2 + Vn1(2)**2 + Vn1(3)**2)
+         Vn1(1:3) = Vn1(1:3)/Vmag 
+
+         Xvec(1) = Tet(indx_Tem+1) - Tet(indx_Tem-1)
+         Xvec(2) = 0.0_rprec
+         Xvec(3) = dlog10(intpar*NeRt(indx_Tem+1,indx_Nem)) - 
+     &             dlog10(intpar*NeRt(indx_Tem-1,indx_Nem))
+
+         Yvec(1) = 0.0_rprec
+         Yvec(2) = dlog10(Net(indx_Nem+1)) - dlog10(Net(indx_Nem-1))
+         Yvec(3) = dlog10(intpar*NeRt(indx_Tem,indx_Nem+1)) - 
+     &             dlog10(intpar*NeRt(indx_Tem,indx_Nem-1))
+
+         Vn2(1) = Xvec(2)*Yvec(3) - Xvec(3)*Yvec(2)
+         Vn2(2) = Xvec(3)*Yvec(1) - Xvec(1)*Yvec(3)
+         Vn2(3) = Xvec(1)*Yvec(2) - Xvec(2)*Yvec(1)
+
+         Vmag = dsqrt(Vn2(1)**2 + Vn2(2)**2 + Vn2(3)**2)
+         Vn2(1:3) = Vn2(1:3)/Vmag 
+
+         K1 = Vn1(3)*(dlog10(intpar*(TeRexp(n)-dTeRtot)) -  
+     &                dlog10(intpar*TeRt(indx_Tem,indx_Nem)))
+         K2 = Vn2(3)*(dlog10(intpar*(NeRexp(n)-dNeRtot)) -  
+     &                dlog10(intpar*NeRt(indx_Tem,indx_Nem)))
+
+         dTet_exp(n,1) = (Vn1(2)*K2/Vn2(2)-K1)/
+     &	                 (Vn1(1)-Vn1(2)*Vn2(1)/Vn2(2)) + 
+     &                   Tet(indx_Tem) 
+
+         dNet_exp(n,2) = -(Vn2(1)*(dTet_exp(n,1) - 
+     &	                 Tet(indx_Tem))+K2)/Vn2(2) + 
+     &                   dlog10(Net(indx_Nem))
+         dNet_exp(n,2) = (10.0e+0_rprec)**dNet_exp(n,2)		  		  
+
+         dTet_exp(n,1) = abs(dTet_exp(n,1))
+         dNet_exp(n,2) = abs(dNet_exp(n,2))
+
+         if(dTet_exp(n,1) .gt. Tet(nTet)) then
+            dTet_exp(n,1) = Tet(nTet)
+         endif
+         if(dTet_exp(n,1) .lt. Tet(1)) then
+            dTet_exp(n,1) = Tet(1)
+         endif
+
+         if(dNet_exp(n,2) .gt. Net(nNet)) then
+            dNet_exp(n,2) = Net(nNet)
+         endif
+         if(dNet_exp(n,2) .lt. Net(1)) then
+            dNet_exp(n,2) = Net(1)
+         endif
+
+         dTet_exp(n,1) = abs(Tet_exp(n)-dTet_exp(n,1))
+         dNet_exp(n,2) = abs(Net_exp(n)-dNet_exp(n,2))
+	 
+	 if(isnan(dTet_exp(n,1))) then
+	    dTet_exp(n,1) = 0.0_rprec
+	 endif    
+	 if(isnan(dNet_exp(n,2))) then
+	    dNet_exp(n,2) = 0.0_rprec
+	 endif    
+
+c-------------------------------------------------------------------------------      
+         chi_te_ne = (1.0_rprec - Tet_exp(n)/Te_exp(n))**2 + 
+     &               (1.0_rprec - Net_exp(n)/Ne_exp(n))**2
+
+         if((Net_exp(n) .ge. Ne_ref) .and. (n .gt. 11)) then
+	    if(chi_te_ne .le. chi_te_ne_o) then
+	       chi_te_ne_o = chi_te_ne
+	    else
+	       ndt = n - 1
+	       exit
+	    endif   
+	 endif
+
+      enddo
+
+      do n = 1,ndt
+         Te_exp(n) = Tet_exp(n)
+         dTe_exp(n,1:2) = dTet_exp(n,1:2)
+
+         if(Net_exp(n) .lt. Ne_exp(n)) then 
+	    Ne_exp(n) = Net_exp(n)
+	    dNe_exp(n,1:2) = dNet_exp(n,1:2)
+	 endif	 
+      enddo
+
+c-------------------------------------------------------------------------------      
+c   Writes to the output files
+c-------------------------------------------------------------------------------      
+      open(90,file='TeNe.dat')
+      write(90,100) 'Radius(m)', 'Te(eV)', '+dTe', '-dTe', 
+     &                           'Ne(cm^-3)', '+dNe', '-dNe'
+      do n = 1,nexp
+         write(90,110) radius(n),  
+     &	               Te_exp(n), dTe_exp(n,1), dTe_exp(n,2),
+     &	               Ne_exp(n), dNe_exp(n,1), dNe_exp(n,2)
+      enddo
+      close(90)  
+
+      call system('gnuplot < gnu_script_te')
+      call system('gnuplot < gnu_script_ne')
+      call system('kghostview Te_Plot.eps &')
+      call system('kghostview Ne_Plot.eps &')
+	
+c-------------------------------------------------------------------------------      
+c   Deallocates arrays
+c-------------------------------------------------------------------------------      
+      deallocate(I_667exp,I_706exp,I_728exp)
+      deallocate(I_667,I_706,I_728)
+      deallocate(dI_667exp,dI_706exp,dI_728exp)
+      deallocate(radius)
+      deallocate(TeRexp,NeRexp,TeNeRexp)
+      deallocate(dTeRexp,dNeRexp,dTeNeRexp)
+      deallocate(Te_exp,Ne_exp)
+      deallocate(dTe_exp,dNe_exp)
+      deallocate(Tet_exp,Net_exp)
+      deallocate(dTet_exp,dNet_exp)
+      
+c-------------------------------------------------------------------------------
+c  End of program
+c-------------------------------------------------------------------------------
+      write(*,*) 'End of program'
+	     	     
+      end program linerd
+
+c-------------------------------------------------------------------------------
+c-------------------------------------------------------------------------------
+
+c-------------------------------------------------------------------------------
+c-------------------------------------------------------------------------------
+c-------------------------------------------------------------------------------
+      subroutine savgol(c,np,nl,nr,ld,m)
+
+c-------------------------------------------------------------------------------
+c  Type declarations - lengths of reals, integers, and complexes
+c-------------------------------------------------------------------------------
+      integer, parameter :: rprec = SELECTED_REAL_KIND(12,100)
+      integer, parameter :: iprec = SELECTED_INT_KIND(12)
+      integer, parameter :: rdprec = SELECTED_REAL_KIND(6,37)
+      integer, parameter :: cprec = KIND((1.0_rprec,1.0_rprec))
+
+c-------------------------------------------------------------------------------
+      integer(iprec) ld,m,nl,np,nr,MMAX
+      real(rprec) c(np)
+      parameter (MMAX=6)
+      integer(iprec) imj,ipj,j,k,kk,mm,indx(MMAX+1)
+      real(rprec) d,fac,sum,a(MMAX+1,MMAX+1),b(MMAX+1)
+      
+      if(np.lt.nl+nr+1.or.nl.lt.0.or.nr.lt.0.or.ld.gt.m.or.m.gt.MMAX
+     &     .or.nl+nr.lt.m) pause 'bad args in savgol'
+      do ipj=0,2*m
+         sum=0.0_rprec
+	 if(ipj.eq.0)sum=1.0_rprec
+	 do k=1,nr
+	    sum=sum+float(k)**ipj
+	 enddo
+	 do k=1,nl
+	    sum=sum+float(-k)**ipj
+	 enddo
+	 mm=min(ipj,2*m-ipj)
+	 do imj=-mm,mm,2
+	    a(1+(ipj+imj)/2,1+(ipj-imj)/2)=sum
+	 enddo
+      enddo
+      call ludcmp(a,m+1,MMAX+1,indx,d)
+      do j=1,m+1
+         b(j)=0.0_rprec
+      enddo
+      b(ld+1)=1.
+      call lubksb(a,m+1,MMAX+1,indx,b)
+      do kk=1,np
+         c(kk)=0.0_rprec
+      enddo
+      do k=-nl,nr
+         sum=b(1)
+	 fac=1.0_rprec
+	 do mm=1,m
+	    fac=fac*k
+	    sum=sum+b(mm+1)*fac
+	 enddo
+	 kk=mod(np-k,np)+1
+	 c(kk)=sum
+      enddo
+      return
+      end
+      
+c-------------------------------------------------------------------------------
+c-------------------------------------------------------------------------------
+c-------------------------------------------------------------------------------
+      subroutine ludcmp(a,n,np,indx,d)
+
+c-------------------------------------------------------------------------------
+c  Type declarations - lengths of reals, integers, and complexes
+c-------------------------------------------------------------------------------
+      integer, parameter :: rprec = SELECTED_REAL_KIND(12,100)
+      integer, parameter :: iprec = SELECTED_INT_KIND(12)
+      integer, parameter :: rdprec = SELECTED_REAL_KIND(6,37)
+      integer, parameter :: cprec = KIND((1.0_rprec,1.0_rprec))
+
+c-------------------------------------------------------------------------------
+      integer(iprec) n,np,indx(n),NMAX
+      real(rprec) d,a(np,np),TINY
+      parameter (NMAX=500,TINY=1.0e-20)
+      integer(iprec) i,imax,j,k
+      real(rprec) aamax,dum,sum,vv(NMAX)
+      
+      d=1.0_rprec
+      do i=1,n
+         aamax=0.0_rprec
+	 do j=1,n
+	    if(abs(a(i,j)).gt.aamax) aamax=abs(a(i,j))
+	 enddo
+	 if(aamax.eq.0.0_rprec) pause 'singular matrix in ludcmp'
+	 vv(i)=1./aamax
+      enddo
+      do j=1,n
+         do i=1,j-1
+	    sum=a(i,j)
+	    do k=1,i-1
+	       sum=sum-a(i,k)*a(k,j)
+	    enddo
+	    a(i,j)=sum
+	 enddo
+	 aamax=0.0_rprec
+	 do i=j,n
+	    sum=a(i,j)
+	    do k=1,j-1
+	       sum=sum-a(i,k)*a(k,j)
+	    enddo
+	    a(i,j)=sum
+	    dum=vv(i)*abs(sum)
+	    if(dum.ge.aamax) then
+	       imax=i
+	       aamax=dum
+	    endif
+	 enddo
+	 if(j.ne.imax) then
+	    do k=1,n
+	       dum=a(imax,k)
+	       a(imax,k)=a(j,k)
+	       a(j,k)=dum
+	    enddo
+	    d=-d
+	    vv(imax)=vv(j)
+	 endif
+	 indx(j)=imax
+	 if(a(j,j).eq.0.0_rprec) a(j,j)=TINY
+	 if(j.ne.n) then
+	    dum=1./a(j,j)
+	    do i=j+1,n
+	       a(i,j)=a(i,j)*dum
+	    enddo
+	 endif
+      enddo
+      return
+      end
+      
+c-------------------------------------------------------------------------------
+c-------------------------------------------------------------------------------
+c-------------------------------------------------------------------------------
+      subroutine lubksb(a,n,np,indx,b)
+
+c-------------------------------------------------------------------------------
+c  Type declarations - lengths of reals, integers, and complexes
+c-------------------------------------------------------------------------------
+      integer, parameter :: rprec = SELECTED_REAL_KIND(12,100)
+      integer, parameter :: iprec = SELECTED_INT_KIND(12)
+      integer, parameter :: rdprec = SELECTED_REAL_KIND(6,37)
+      integer, parameter :: cprec = KIND((1.0_rprec,1.0_rprec))
+
+c-------------------------------------------------------------------------------
+      integer(iprec) n,np,indx(n)
+      real(rprec) a(np,np),b(n)
+      integer(iprec) i,ii,j,ll
+      real(rprec) sum
+      ii=0
+      do i=1,n
+         ll=indx(i)
+	 sum=b(ll)
+	 b(ll)=b(i)
+	 if(ii.ne.0) then
+	    do j=ii,i-1
+	       sum=sum-a(i,j)*b(j)
+	    enddo
+	 elseif(sum.ne.0.0_rprec) then
+	    ii=i
+	 endif
+	 b(i)=sum
+      enddo
+      do i=n,1,-1
+         sum=b(i)
+	 do j=i+1,n
+	    sum=sum-a(i,j)*b(j)
+	 enddo
+	 b(i)=sum/a(i,i)
+      enddo
+      return
+      end
+
+c-------------------------------------------------------------------------------
+c-------------------------------------------------------------------------------
+
+
+

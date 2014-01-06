@@ -1,0 +1,74 @@
+set size 0.65,0.65
+set xlabel '|R - R_o| (m)' font 'Helvetica,20'
+set ylabel 'n_e (cm^{-3})' font 'Helvetica,20'
+
+set xrange [0.4:0.522]
+set yrange [0.0:1.0e+13]
+p 'TeNe.dat' u ($1):($5):($5+$6):($5-$7) t 'Hybrid He I Model' with yerrorbars lw 2 lt 2 pt 2
+rep 'expdata/101401/HeBeam.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR He I Eq. Model' with yerrorbars lw 1 lt 3 pt 12
+rep 'expdata/101401/LiBeam.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR Li Beam Diag.' with yerrorbars lw 1 lt 4 pt 11
+rep 'expdata/101401/TS.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR Edge TS' with yerrorbars lw 1 lt 5 pt 13
+rep 'expdata/101401/LCFS.txt' u 1:2 t 'LCFS' w l lw 2 lt 1  
+set terminal postscript eps enhanced color
+set output 'Ne_Plot.eps'
+
+#set xrange [0.455:0.522]
+#set yrange [0.0:1.0e+13]
+#p 'diagnostic_new.dat' u ($1):($5) t 'Equilibrium He I Model' lw 1 lt 2 pt 5
+#rep 'dnidt.dat' u ($1):($3) t 'Time Dependent He I Model' lw 1 lt 1 pt 7
+#rep 'TeNe.dat' u ($1):($5):($5+$6):($5-$7) t 'Hybrid He I Model' with yerrorbars lw 2 lt 0 pt 2
+#rep 'expdata/textor_err/102175/HeBeam.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR He I Eq. Model' with yerrorbars lw 1 lt 3 pt 12
+#rep 'expdata/textor_err/102175/TS.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR Edge TS' with yerrorbars lw 1 lt 5 pt 13
+#rep 'expdata/textor_err/102175/LCFS.txt' u 1:2 t 'LCFS' w l lw 2 lt 1  
+#set terminal postscript eps enhanced color
+#set output 'Ne_Plot_102175.eps'
+
+#set xrange [0.46:0.522]
+#set yrange [0.0:1.5e+13]
+#p 'diagnostic_new.dat' u ($1):($5) t 'Equilibrium He I Model' lw 1 lt 2 pt 5
+#rep 'dnidt.dat' u ($1):($3) t 'Time Dependent He I Model' lw 1 lt 1 pt 7
+#rep 'TeNe.dat' u ($1):($5):($5+$6):($5-$7) t 'Hybrid He I Model' with yerrorbars lw 2 lt 0 pt 2
+#rep 'expdata/textor_err/102118/HeBeam.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR He I Eq. Model' with yerrorbars lw 1 lt 3 pt 12
+#rep 'expdata/textor_err/102118/TS.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR Edge TS' with yerrorbars lw 1 lt 5 pt 13
+#rep 'expdata/textor_err/102118/LCFS.txt' u 1:2 t 'LCFS' w l lw 2 lt 1  
+#set terminal postscript eps enhanced color
+#set output 'Ne_Plot_102118.eps'
+
+#set xrange [0.456:0.522]
+#set yrange [0.0:1.0e+13]
+#p 'diagnostic_new.dat' u ($1):($5) t 'Equilibrium He I Model' lw 1 lt 2 pt 5
+#rep 'dnidt.dat' u ($1):($3) t 'Time Dependent He I Model' lw 1 lt 1 pt 7
+#rep 'TeNe.dat' u ($1):($5):($5+$6):($5-$7) t 'Hybrid He I Model' with yerrorbars lw 2 lt 0 pt 2
+#rep 'expdata/textor_err/101738/HeBeam.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR He I Eq. Model' with yerrorbars lw 1 lt 3 pt 12
+#rep 'expdata/textor_err/101738/TS.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR Edge TS' with yerrorbars lw 1 lt 5 pt 13
+#rep 'expdata/textor_err/101738/LCFS.txt' u 1:2 t 'LCFS' w l lw 2 lt 1  
+#set terminal postscript eps enhanced color
+#set output 'Ne_Plot_101738.eps'
+
+#set xrange [0.4:0.522]
+#set yrange [0.0:4.5e+12]
+#p 'diagnostic_new.dat' u ($1):($5) t 'Equilibrium He I Model' lw 1 lt 2 pt 5 
+#rep 'dnidt.dat' u ($1):($3) t 'Time Dependent He I Model' lw 1 lt 1 pt 7
+#rep 'TeNe.dat' u ($1):($5):($5+$6):($5-$7) t 'Hybrid He I Model' with yerrorbars lw 2 lt 0 pt 2
+#rep 'expdata/textor_err/101818/HeBeam.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR He I Eq. Model' with yerrorbars lw 1 lt 3 pt 12
+#rep 'expdata/textor_err/101818/LiBeam.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR Li Beam Diag.' with yerrorbars lw 1 lt 4 pt 11
+#rep 'expdata/textor_err/101818/FastProbe.txt' u ($1):(1.0e+13*($2)):(1.0e+13*($2+$3)):(1.0e+13*($2-$3)) t 'TEXTOR Fast Probe' with yerrorbars lw 1 lt 5 pt 8
+#rep 'expdata/textor_err/101818/LCFS.txt' u 1:2 t 'LCFS' w l lw 2 lt 1 
+#set terminal postscript eps enhanced color
+#set output 'Ne_Plot_101818.eps'
+
+#set xrange [0.4:0.52]
+#set yrange [0.0:7.0e+12]
+#p 'diagnostic_new.dat' u ($1):($5) t 'Equilibrium He I Model' lw 1 lt 2 pt 5 
+#rep 'dnidt.dat' u ($1):($3) t 'Time Dependent He I Model' lw 1 lt 1 pt 7
+#rep 'TeNe.dat' u ($1):($5):($5+$6):($5-$7) t 'Hybrid He I Model' with yerrorbars lw 2 lt 0 pt 2
+#rep 'expdata/textor_err/101795/HeBeam.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR He I Eq. Model' with yerrorbars lw 1 lt 3 pt 12
+#rep 'expdata/textor_err/101795/LiBeam.txt' u ($1):(1.0e-6*($2)):(1.0e-6*($2+$3)):(1.0e-6*($2-$3)) t 'TEXTOR Li Beam Diag.' with yerrorbars lw 1 lt 4 pt 11
+#rep 'expdata/textor_err/101795/FastProbe.txt' u ($1):(1.0e+13*($2)):(1.0e+13*($2+$3)):(1.0e+13*($2-$3)) t 'TEXTOR Fast Probe' with yerrorbars lw 1 lt 5 pt 8
+#rep 'expdata/textor_err/101795/LCFS.txt' u 1:2 t 'LCFS' w l lw 2 lt 1 
+#set terminal postscript eps enhanced color
+#set output 'Ne_Plot_101795.eps'
+
+rep
+set terminal x11
+quit

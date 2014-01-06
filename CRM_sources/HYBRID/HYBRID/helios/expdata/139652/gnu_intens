@@ -1,0 +1,15 @@
+set xlabel 'time t [ms]'
+set ylabel 'Emission Intensity [ph sr^{-1}m^{-2}]'
+
+set xrange [1000.0:6500.0]
+set yrange [0.0:3.0e+16]
+
+p 'HeInts.txt' u 1:6 t 'Experiment 667.9 nm' w l lt 3 lw 1
+rep 'HeInts.txt' u 1:3 t 'Experiment 706.7 nm' w l lt 2 lw 1
+rep 'HeInts.txt' u 1:5 t 'Experiment 728.3 nm' w l lt 1 lw 1
+set terminal postscript eps enhanced color
+set output 'intensity.eps'
+
+rep
+set terminal x11
+quit
