@@ -1,0 +1,45 @@
+duplicate/o tb01_7281_l_fin ratioch15_728706
+ratioch15_728706 = tb01_7281_L_fin/tb02_7065_L_fin
+smooth/b 5, ratioch15_728706
+duplicate/o tb01_7281_l_fin ratioch15_667728
+ratioch15_667728 = tb03_6678_L_fin/tb01_7281_L_fin
+smooth/b 5, ratioch15_667728
+
+duplicate/o tb05_7281_l_fin ratioch16_728706
+ratioch16_728706 = tb05_7281_L_fin/tb06_7065_L_fin
+smooth/b 5, ratioch16_728706
+duplicate/o tb05_7281_l_fin ratioch16_667728
+ratioch16_667728 = tb07_6678_L_fin/tb05_7281_L_fin
+smooth/b 5, ratioch16_667728
+
+duplicate/o tb09_7281_l_fin ratioch17_728706
+ratioch17_728706 = tb09_7281_L_fin/tb10_7065_L_fin
+smooth/b 5, ratioch17_728706
+duplicate/o tb09_7281_l_fin ratioch17_667728
+ratioch17_667728 = tb11_6678_L_fin/tb09_7281_L_fin
+smooth/b 5, ratioch17_667728
+
+duplicate/o tb20_7281_l_fin ratioch18_728706
+ratioch18_728706 = tb20_7281_L_fin/tb19_7065_L_fin
+smooth/b 5, ratioch18_728706
+duplicate/o tb20_7281_l_fin ratioch18_667728
+ratioch18_667728 = tb18_6678_L_fin/tb20_7281_L_fin
+smooth/b 5, ratioch18_667728
+
+duplicate/o tb24_7281_l_fin ratioch19_728706
+ratioch19_728706 = tb24_7281_L_fin/tb23_7065_L_fin
+smooth/b 5, ratioch19_728706
+duplicate/o tb24_7281_l_fin ratioch19_667728
+ratioch19_667728 = tb22_6678_L_fin/tb24_7281_L_fin
+smooth/b 5, ratioch19_667728
+
+duplicate/o tb25_7281_l_fin ratioch20_728706
+ratioch20_728706 = tb25_7281_L_fin/tb26_7065_L_fin
+smooth/b 5, ratioch20_728706
+duplicate/o tb25_7281_l_fin ratioch20_667728
+ratioch20_667728 = tb27_6678_L_fin/tb25_7281_L_fin
+smooth/b 5, ratioch20_667728
+
+
+
+

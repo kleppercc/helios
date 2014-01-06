@@ -1,0 +1,338 @@
+basenum = 1000
+
+num=0
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+$hold2 *=800
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=1
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=2
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=3
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=4
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=5
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=6
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=7
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=8
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=9
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=10
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=11
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=12
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=13
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=14
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=15
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=16
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=17
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=18
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=19
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=20
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=21
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=22
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=23
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=24
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=25
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=26
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=27
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=28
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=29
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=30
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=31
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=32
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=33
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=34
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=35
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=36
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=37
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=38
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=39
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=40
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=41
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=42
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=43
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=44
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=45
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=46
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2
+
+num=47
+hold=:HELIOSFS_115748:PMTDESC_array[num]
+hold2="tb"+hold[2,9]
+make/n=(:HELIOSFS_115748:samples[0])/o $hold2
+$hold2[] = :HELIOSFS_115748:FiltFlux_array[p][num]
+Interpolate2/T=1/N=(:HELIOSFS_115748:samples[0]/basenum)/I=3/A=(:HELIOSFS_115748:samples[0]/basenum)/J=2/Y=$hold2+"_L"/X=tBase_L tBase, $hold2

@@ -1,0 +1,115 @@
+¥HDF5CreateFile /O/P=Desktop fileID as "HELIOS_115747.h5"
+¥
+¥HDF5CreateGroup fileID,"Raw_data",groupID1
+¥HDF5CreateGroup fileID,"Processed_data",groupID2
+¥
+¥SetDataFolder root:HELIOSFS_115747
+¥
+¥HDF5SaveData/O/LAYO={2,750000,48}/GZIP={9,1} FILTFLUX_array, root:groupID1
+¥HDF5SaveData/O/LAYO={2,48}/GZIP={9,1} PMTDESC_array, root:groupID1
+¥HDF5SaveData/O/LAYO={2,1}/GZIP={9,1} DEL_t, root:groupID1
+¥HDF5SaveData/O/LAYO={2,1}/GZIP={9,1} Samples, root:groupID1
+¥HDF5SaveData/O/LAYO={2,1}/GZIP={9,1} t_Delay, root:groupID1
+¥HDF5SaveData/O/LAYO={2,1}/GZIP={9,1} t_Trigger, root:groupID1
+¥
+¥SetDataFolder root:
+¥
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb01_7281_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb02_7065_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb03_6678_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb04_6563_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb05_7281_L,root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb06_7065_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb07_6678_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb08_6563_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb09_7281_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb10_7065_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb11_6678_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb12_6563_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb13_6563_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb14_6678_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb15_7065_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb16_7281_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb17_6563_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb18_6678_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb19_7065_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb20_7281_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb21_6563_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb22_6678_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb23_7065_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb24_7281_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb25_7281_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb26_7065_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb27_6678_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb28_6563_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb29_7281_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb30_7065_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb31_6678_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb32_6563_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb33_7281_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb34_7065_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb35_6778_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb36_6563_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb37_6563_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb38_6678_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb39_7065_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb40_7281_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb41_6563_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb42_6678_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb43_7065_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb44_7281_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb45_6563_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb46_6678_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb47_7065_L, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb48_7281_L, root:groupID2
+¥
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb01_7281_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb02_7065_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb03_6678_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb04_6563_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb05_7281_L_fin,root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb06_7065_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb07_6678_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb08_6563_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb09_7281_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb10_7065_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb11_6678_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb12_6563_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb13_6563_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb14_6678_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb15_7065_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb16_7281_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb17_6563_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb18_6678_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb19_7065_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb20_7281_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb21_6563_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb22_6678_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb23_7065_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb24_7281_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb25_7281_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb26_7065_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb27_6678_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb28_6563_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb29_7281_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb30_7065_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb31_6678_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb32_6563_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb33_7281_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb34_7065_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb35_6778_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb36_6563_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb37_6563_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb38_6678_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb39_7065_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb40_7281_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb41_6563_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb42_6678_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb43_7065_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb44_7281_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb45_6563_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb46_6678_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb47_7065_L_fin, root:groupID2
+¥HDF5SaveData/O/LAYO={2,1500}/GZIP={9,1} tb48_7281_L_fin, root:groupID2
+¥
+¥HDF5CloseFile fileID
