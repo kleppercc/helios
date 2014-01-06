@@ -21,26 +21,28 @@
 #*
 #*****************************************************************************************
 
+import numpy as np
+import scipy as sp
 from scipy import io as sio
 
 #@mfunction("ne_axis, Te_axis, ne_ratio_model, Te_ratio_model")
-def load_tapete(tapete_name='tapete_all_n_62_a.mat',quiet=True):
+def load_tapete(tapete_name='tapete_all_n_62_a.mat',quiet=0):
 
     #*** Load the tapete
     #*** Exist this data as mat file (loading is much, much faster)
     try:
-        if not quiet:
+        if quiet!=0:
         	print '----------------------------------------------------------'
         	print '------- Start loading of tapete from .mat.'
         #varnames = ['ne_axis','Te_axis','ne_ratio_model','Te_ratio_model']
-        res_tap = sio.loadmat(tapete_name)
+        res_tap = sp.io.loadmat(tapete_name)
     except IOError:
         #*** Load tapete as dummy to test for number of lines
         #*** Matlab can not load it directly with 'load'!
-        if not quiet:
+        if quiet!=0:
         	print '----------------------------------------------------------'
         	print '------- Start loading of tapete. Please wait a moment'
-        	print '--- Tapete used is: {}'.format(tapete_name)
+        	print '--- Tapete used is: %s', tapete_name
 
     #test_lnum = sio.loadmat(tapete_name)
     #stest = np.shape(test_lnum)
@@ -70,7 +72,7 @@ def load_tapete(tapete_name='tapete_all_n_62_a.mat',quiet=True):
     Te_ratio_model = res_tap['Te_ratio_model']
     ne_ratio_model = res_tap['ne_ratio_model']
 
-    if not quiet:
+    if quiet!=0:
     	print '------- Finished loading tapete'
 
     return Te_axis, ne_axis, Te_ratio_model, ne_ratio_model
