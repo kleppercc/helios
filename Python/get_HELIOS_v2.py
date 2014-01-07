@@ -45,7 +45,7 @@ warnings.simplefilter('ignore', DeprecationWarning)
 
 # tubeNum = 48
 ####### End String Define #####
-def grab(SHOT, tubeNum=48,TreeName='helios',write_files=False,make_raw=False,make_tBase=True):
+def grab(SHOT,tubeNum=48,TreeName='helios',write_files=False,make_raw=False,make_tBase=True,quiet=True):
     #mds.Connection(ServerName)
     TreeObj = mds.Tree(TreeName,SHOT,'EDIT')
 
@@ -106,10 +106,11 @@ def grab(SHOT, tubeNum=48,TreeName='helios',write_files=False,make_raw=False,mak
 
         if (make_raw): PMTRAWarr[:,j-1] = V_PMT
 
-        compl = j/float(tubeNum)
-        sys.stdout.write('\r')
-        sys.stdout.write("[%-48s] %d%%" % ('='*j,((compl)*100)))
-        sys.stdout.flush()
+        if not quiet:
+            compl = j/np.float(tubeNum)
+            sys.stdout.write('\r')
+            sys.stdout.write("[%-48s] %d%%" % ('='*j,((compl)*100)))
+            sys.stdout.flush()
 
     if (make_tBase):
         start = np.round((T_START+DELAY),3)
@@ -119,7 +120,7 @@ def grab(SHOT, tubeNum=48,TreeName='helios',write_files=False,make_raw=False,mak
 
     if (write_files):
         # Write a HDF5 file
-        print '\n---START: write HDF5---'
+        if not quiet: print '\n---START: write HDF5---'
         from h5py import *
         fil = File('HeliosFS_'+str(SHOT)+'.h5','w')
         # ---- Dig. Settings -----
@@ -165,8 +166,8 @@ def grab(SHOT, tubeNum=48,TreeName='helios',write_files=False,make_raw=False,mak
             ds = fil.create_dataset(tagNam,dimshape,'f',compression='gzip',chunks=dimshape,compression_opts=9,shuffle='true')
             ds[...] = tBase
         fil.close()
-        print '---DONE: write HDF5---'
-    print '\nDone with {} : Sehr Gut'.format(SHOT)
+        if not quiet: print '---DONE: write HDF5---'
+    if not quiet: print '\nDone with {} : Sehr Gut'.format(SHOT)
 
     if (make_raw):
         finDICT = {'shot':SHOT,'t_Delay':DELAY,'Samples':SAMPLES,'t_Trigger':T_START,'DEL_t':DIG_FREQ,'PMTDESC_array':DESCarr,'FILTFLUX_array':FILTFLUXarr,
