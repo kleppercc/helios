@@ -1,30 +1,47 @@
 #SmoothUtils
-import numpy as np
-import pandas as pds
 
-def Takeoff_bac(wav,pntsm,interppnt,frac,quiet=True):
-	if not quiet:
-		print 'Takeoff_bac t1: {}'.format(wav.name)
-	wav2 = Get_back(wav,pntsm,frac)
-	wav4 = pds.stats.moments.rolling_min(wav2,interppnt)
-	wav4 = wav4.fillna(0)
-	OutWav = wav.sub(wav4)
-	if not quiet:
-		print 'Takeoff_bac t2: {}'.format(OutWav)
-	return OutWav
+Function Takeoff_bac(pntsm,interppnt,wav,twav,frac)
+	Variable pntsm
+	Variable interppnt
+	String wav
+	Wave twav
+	Variable frac
+	
+	Wave wav1 = $wav
+	
+	Get_back(wav,pntsm,frac)
+	
+	String neuwav = wav+"_bac"
+	Wave wav2 = $neuwav
+	
+	String finalwav = wav[0,11]+"_fin"
+	String tempwav =  wav[0,11]+"_temp"
+	
+	Duplicate/O wav1 $finalwav, $tempwav
+	Wave wav3 = $finalwav
+	Wave wav4 = $tempwav
+	
+	WaveStats/Q $wav
+	Variable Nums = V_npnts
+	Interpolate2/T=1/N=(Nums)/A=(interppnt)/J=0/Y=wav4 twav, wav2
+
+	wav3 = wav1 - wav4
+	
+	KillWaves wav2,wav4
+end
 
 def Get_back(wav,pntsm,frac):
 	wavpnts = len(wav)
-	wav2 = pds.Series(wav)
-	for i in xrange(0,wavpnts,pntsm):
-		result = PerctSmooth(wav,i,(i+pntsm),frac)
+	wav2 = wav.copy()
+	wav2.name = wav.name+'_bac'
+	for iin xrange(0,wavpnts,pntsm):
+		result = PerctSmooth(neuwav,i,(i+pntsm))
 		wav2[i:(i+pntsm)] = result.value
 	return wav2
 
 def PerctSmooth(inWav,start,end,frac,stddev=False):
 	hold = inWav[start:end]
-	outWav = inWav.copy()
-	outWav.value = np.percentile(hold,frac,overwrite_input=False)
+	outWav.value = np.percentile(hold,frac,overwrite_input=False, interpolation='linear')
 	if stddev:
 		stddevWav = np.std(outWav)
 		return outWav, stddevWav
