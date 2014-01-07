@@ -1,8 +1,9 @@
 # Palop smoothing function
 import numpy as np
 import pylab as pl
+import scipy.signal as scs
 
-def smooth(wavIn,sampwid,stdev):
+def smooth(wavIn,sampwid=100,stdev=2.):
 
 	xs = np.arange(sampwid)-(sampwid/2)
 
@@ -25,7 +26,8 @@ def smooth(wavIn,sampwid,stdev):
 		if (len(hold) != len(g_tot)):
 			addon = len(g_tot) - len(hold)
 			hold = np.append(hold,np.zeros(addon))
-		holder=np.convolve(hold,g_tot,mode='same')
+		#holder = np.convolve(hold,g_tot,mode='same')
+		holder = scs.fftconvolve(hold,g_tot,mode='same')
 		wavOut = np.append(wavOut,holder)
 
 	if (len(wavOut) > endrow): wavOut = wavOut[0:endrow]
