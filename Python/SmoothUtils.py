@@ -1,47 +1,38 @@
 #SmoothUtils
+import numpy as np
+import pandas as pds
 
-Function Takeoff_bac(pntsm,interppnt,wav,twav,frac)
-	Variable pntsm
-	Variable interppnt
-	String wav
-	Wave twav
-	Variable frac
-	
-	Wave wav1 = $wav
-	
-	Get_back(wav,pntsm,frac)
-	
-	String neuwav = wav+"_bac"
-	Wave wav2 = $neuwav
-	
-	String finalwav = wav[0,11]+"_fin"
-	String tempwav =  wav[0,11]+"_temp"
-	
-	Duplicate/O wav1 $finalwav, $tempwav
-	Wave wav3 = $finalwav
-	Wave wav4 = $tempwav
-	
-	WaveStats/Q $wav
-	Variable Nums = V_npnts
-	Interpolate2/T=1/N=(Nums)/A=(interppnt)/J=0/Y=wav4 twav, wav2
+def Takeoff_bac(wav,tubeNum,pntsm,interppnt,frac=50,quiet=True):
+	if not quiet:
+		print 'here'
+		wavNum = wav.shape[1]
+		for i in xrange(wavNum):
+			print wav[i].name
+	wav2 = Get_back(wav,tubeNum,pntsm,frac)
+	wav4 = pds.stats.moments.rolling_min(wav2,interppnt)
+	# wav4 = PerctSmooth(wav2,wav2.index[0],wav2.index[-1],frac=10)
+	OutWav = wav - wav4
+	return OutWav
 
-	wav3 = wav1 - wav4
-	
-	KillWaves wav2,wav4
-end
-
-def Get_back(wav,pntsm,frac):
+def Get_back(wav,tubeNum,pntsm,frac):
 	wavpnts = len(wav)
-	wav2 = wav.copy()
-	wav2.name = wav.name+'_bac'
-	for iin xrange(0,wavpnts,pntsm):
-		result = PerctSmooth(neuwav,i,(i+pntsm))
+	for i in xrange(tubeNum):
+		if i == 0:
+			wav2 = pds.DataFrame(wav[i],index=wav[i].index)
+			wav2.columns = [i]
+		else:
+			wav2[i] = wav[i]
+		print wav[i].name
+		wav2[i].name = wav[i].name+'_bac'
+	for i in xrange(0,wavpnts,pntsm):
+		result = PerctSmooth(wav,i,(i+pntsm),frac)
 		wav2[i:(i+pntsm)] = result.value
 	return wav2
 
 def PerctSmooth(inWav,start,end,frac,stddev=False):
 	hold = inWav[start:end]
-	outWav.value = np.percentile(hold,frac,overwrite_input=False, interpolation='linear')
+	outWav = inWav.copy()
+	outWav.value = np.percentile(hold,frac,overwrite_input=False)
 	if stddev:
 		stddevWav = np.std(outWav)
 		return outWav, stddevWav
