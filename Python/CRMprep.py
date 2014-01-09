@@ -18,45 +18,67 @@ def loadtoPDS(SHOT,tubeNUM=48,quiet=True):
 					't_Trigger':outDICT['t_Trigger'],'DEL_t':outDICT['DEL_t']}
 	return fluxARR, headerDICT
 
-def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,pntsm=100,interppnt=150,frac=30,smoothTF=True,quiet=True):
+def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smpnt=4000,smstdev=7,bacPNTSM=5,bacinterppnt=150,bacfrac=30,smoothTF=True,quiet=True,debug=False):
 	baseNum = int(baseNum)
-	# tottime = np.abs(fluxARR[0].index[-1])-np.abs(fluxARR[0].index[0])
+	tottime = np.abs(fluxARR[0].index[-1])-np.abs(fluxARR[0].index[0])
 	newARR = pds.stats.moments.rolling_mean(fluxARR,baseNum)
 	newARR = newARR.fillna(newARR.index[1])
 	newARR_Short = newARR[::baseNum]
 	for i in xrange(tubeNUM):
 		newARR_Short[i].name = fluxARR[i].name+'_L'
-		print 'makWavs test1: '+newARR_Short[i].name
+		if debug and not quiet:
+			print 'makWavs t1: {}'.format(newARR_Short[i].name)
 	if smoothTF:
+		listHolder1=[]
 		for i in xrange(tubeNUM):
-			if i == 0:
-				newARR_sh_sm = smoothWavs(newARR_Short[i],tubeNum=tubeNUM,quiet=quiet)
-				newARR_sh_sm.columns =[i]
-			else:
-				newARR_sh_sm[i] = smoothWavs(newARR_Short[i],quiet=quiet)
-		if not quiet:
-			print 'makWavs test2: {}'.format(newARR_sh_sm[i].name)
-		newARR_backoff = SmU.Takeoff_bac(newARR_sh_sm,tubeNUM,pntsm=pntsm,interppnt=interppnt,frac=30,quiet=quiet)
-		# newARR_backoff = newARR_sh_sm.copy(False)
-		# for i in xrange(tubeNUM):
-			# newARR_backoff[i].name = newARR_sh_sm[i].name+'_bac'
+			hold = smoothWavs(newARR_Short[i],sampwid=smpnt,stdev=smstdev,quiet=quiet,debug=debug)
+			listHolder1.append(pds.Series(data=hold.values,index=hold.index,name=hold.name))
+		newARR_sh_sm = pds.DataFrame(listHolder1).T
+		holdNam = newARR_sh_sm.columns
+		newARR_sh_sm.columns = np.arange(tubeNUM)
+		# need to clean up the name versus column mess.
+		for i in xrange(tubeNUM):
+			newARR_sh_sm[i].name = holdNam[i]
+		if debug and not quiet:
+			for i in xrange(tubeNUM):
+				print 'makWavs t2: {}'.format(newARR_sh_sm[i].name)
+		listHolder2=[]
+		for j in xrange(tubeNUM):
+			listHolder2.append(pds.Series(SmU.Takeoff_bac(newARR_sh_sm[j],pntsm=bacPNTSM,interppnt=bacinterppnt,frac=bacfrac,quiet=quiet),name = newARR_sh_sm[j].name+'_bac'))
+		newARR_backoff = pds.DataFrame(listHolder2).T
+		holdNam = newARR_backoff.columns
+		newARR_backoff.columns = np.arange(tubeNUM)
+		# ditto to above
+		for i in xrange(tubeNUM):
+			newARR_backoff[i].name = holdNam[i]
+		if debug and not quiet:
+			for k in xrange(tubeNUM):
+				print 'makWavs t3: {}'.format(newARR_backoff[k].name)
 	else:
-		newARR_backoff = SmU.Takeoff_bac(newARR_Short,tubeNUM,pntsm=pntsm,interppnt=interppnt,frac=30)
+		listHolder2=[]
+		for j in xrange(tubeNUM):
+			listHolder2.append(pds.Series(SmU.Takeoff_bac(newARR_Short[j],pntsm=pntsm,interppnt=interppnt,frac=frac,quiet=quiet),name = newARR_Short[j].name+'_bac'))
+		newARR_backoff = pds.DataFrame(listHolder2).T
+		holdNam = newARR_backoff.columns
+		newARR_backoff.columns = np.arange(tubeNUM)
+		# ditto to above
 		for i in xrange(tubeNUM):
-			newARR_backoff[i].name = newARR_Short[i].name+'_bac'
-	return newARR_Short,newARR_backoff
+			newARR_backoff[i].name = holdNam[i]
+		if debug and not quiet:
+			for k in xrange(tubeNUM):
+				print 'makWavs t4: {}'.format(newARR_backoff[k].name)
+	print 'Downsampled signals are {:.1} Hz'.format(newARR_Short.shape[0]/tottime)
+	return newARR_Short,newARR_sh_sm,newARR_backoff
 
-def smoothWavs(wav,tubeNum,sampwid=4000,stdev=7,quiet=True):
-	for i in xrange(tubeNum):
-		if i == 0:
-			wavSM = pds.DataFrame(wav[i],index=wav[i].index)
-			wavSM.columns = [i]
-		else:
-			wavSM[i] = wav[i]
-		wavSM[i] = palop.smooth(wav[i],sampwid,stdev)
-		wavSM[i].name = wav[i].name+'_palop'
-		if not quiet:
-			print 'smoothWavs test: {}'.format(wavSM[i].name)
+def smoothWavs(wav,sampwid=None,stdev=None,quiet=True,debug=False):
+	if sampwid==None:
+		sampwid = len(wav)
+	if stdev == None:
+		stdev = 7
+	wavSM = pds.Series(palop.smooth(wav,sampwid,stdev),index=wav.index)
+	wavSM.name = wav.name+'_palop'
+	if debug and not quiet:
+		print 'smoothWavs t1: {}'.format(wavSM.name)
 	return wavSM
 
 def getTimes(y_she_corr, x_she1):
