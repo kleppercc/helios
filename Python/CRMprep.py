@@ -4,6 +4,7 @@ import pandas as pds
 import helios.Python.get_HELIOS_v2 as getHEL
 import helios.Python.palop as palop
 import helios.Python.SmoothUtils as SmU
+import helios.Python.getSHOT as gST
 
 reload(getHEL)
 reload(SmU)
@@ -18,7 +19,7 @@ def loadtoPDS(SHOT,tubeNUM=48,quiet=True):
 					't_Trigger':outDICT['t_Trigger'],'DEL_t':outDICT['DEL_t']}
 	return fluxARR, headerDICT
 
-def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smpnt=4000,smstdev=7,bacPNTSM=5,bacinterppnt=150,bacfrac=30,smoothTF=True,quiet=True,debug=False):
+def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacinterppnt=150,bacfrac=30,smoothTF=True,quiet=True,debug=False):
 	baseNum = int(baseNum)
 	tottime = np.abs(fluxARR[0].index[-1])-np.abs(fluxARR[0].index[0])
 	newARR = pds.stats.moments.rolling_mean(fluxARR,baseNum)
@@ -31,7 +32,7 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smpnt=4000,smstdev=7,bacPN
 	if smoothTF:
 		listHolder1=[]
 		for i in xrange(tubeNUM):
-			hold = smoothWavs(newARR_Short[i],sampwid=smpnt,stdev=smstdev,quiet=quiet,debug=debug)
+			hold = smoothWavs(newARR_Short[i],stdev=smstdev,quiet=quiet,debug=debug)
 			listHolder1.append(pds.Series(data=hold.values,index=hold.index,name=hold.name))
 		newARR_sh_sm = pds.DataFrame(listHolder1).T
 		holdNam = newARR_sh_sm.columns
@@ -70,23 +71,59 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smpnt=4000,smstdev=7,bacPN
 	print 'Downsampled signals are {:.1} Hz'.format(newARR_Short.shape[0]/tottime)
 	return newARR_Short,newARR_sh_sm,newARR_backoff
 
-def smoothWavs(wav,sampwid=None,stdev=None,quiet=True,debug=False):
-	if sampwid==None:
-		sampwid = len(wav)
+def smoothWavs(wav,stdev=None,quiet=True,debug=False):
 	if stdev == None:
 		stdev = 7
-	wavSM = pds.Series(palop.smooth(wav,sampwid,stdev),index=wav.index)
+	wavSM = pds.Series(palop.smooth(wav,stdev),index=wav.index)
 	wavSM.name = wav.name+'_palop'
 	if debug and not quiet:
 		print 'smoothWavs t1: {}'.format(wavSM.name)
 	return wavSM
 
-def getTimes(y_she_corr, x_she1):
-
-	ind = np.where(y_she_corr > 0.5)
+def getTimes(shot,fnamH5,fnamMAT=None,quiet=True,load2HDF=False,debug=False):
+	if load2HDF:
+		if fnamMAT == None:
+			fnamMAT='/Users/unterbee/Desktop/shot_118800.mat'
+		gST.getShotmat(118800,fnamMAT)
+	dataDICT = gST.load2HDF(shot,fnam=fnamH5)
+	ind = np.where(dataDICT['y_she_corr'] > 0.5)
 	tValues = x_she1[ind]
 
 	return tValues
+
+# Function GetTimes()
+	
+# 	Wave y_she_corr
+# 	Wave x_she1
+	
+# 	Make/n=1/o tValues,temp
+# 	Wavestats/Q x_she1
+# 	Variable i, hold
+# 	for(i=0;i<V_npnts;i+=1)
+# 		hold=y_she_corr[i]
+# 		if(hold>0.5)
+# 			temp = x_she1[i]
+# 			Concatenate/NP {temp},tValues
+# 		endif
+# 	endfor
+# 	DeletePoints 0,1,tValues
+# 	KillWaves/Z temp
+# End
+
+# Function FindIndex()
+	
+# 	DFREF dREF = root:s118794_wavs
+# 	Wave/SDFR=dREF tValues
+	
+# 	Make/n=1 holder
+	
+# 	WaveStats/Q tValues
+# 	Variable i,hold
+# 	for(i=0;i<V_npnts;i+=1)
+# 		hold = tValue[i]
+# 		FindValue/V=hold/T=1e-2 tBase_L
+# 	endfor
+# End
 
 # def findIndex(tValues,tBase_L_fix):
 
