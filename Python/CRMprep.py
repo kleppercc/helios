@@ -81,15 +81,19 @@ def smoothWavs(wav,stdev=None,quiet=True,debug=False):
 	return wavSM
 
 def getTimes(shot,fnamH5,fnamMAT=None,quiet=True,load2HDF=False,debug=False):
+	
 	if load2HDF:
 		if fnamMAT == None:
 			fnamMAT='/Users/unterbee/Desktop/shot_118800.mat'
 		gST.getShotmat(118800,fnamMAT)
-	dataDICT = gST.load2HDF(shot,fnam=fnamH5)
-	ind = np.where(dataDICT['y_she_corr'] > 0.5)
-	tValues = x_she1[ind]
+	
+	print 'test'
+	dataDICT = gST.load2DICT(fnamH5)
 
-	return tValues
+	# ind = np.where(dataDICT['y_she_corr'] > 0.5)
+	# tValues = x_she1[ind]
+
+	# return tValues
 
 # Function GetTimes()
 	
