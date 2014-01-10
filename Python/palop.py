@@ -51,7 +51,7 @@ def smooth(wavIn,stdev=2.,fftmod=True,gterm=None,quiet=True):
 def plotem(xx,f_x,f_x_err,f_x_sm):
 	pl.figure()
 	pl.plot(xx,f_x_err,'g',linewidth=2)
-	pl.plot(xx,f_x_sm,'k')
+	pl.plot(xx,f_x_sm,'k',linewidth=2)
 	pl.plot(xx,f_x,'r',linewidth=2)
 
 def example(pnts=None,stdev=2,plotIt=True,gterm=4):
