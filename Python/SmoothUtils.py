@@ -8,12 +8,9 @@ def Takeoff_bac(wav,pntsm,interppnt,frac,quiet=True):
 	wav2 = Get_back(wav,pntsm,frac)
 	wav4 = pds.stats.moments.rolling_min(wav2,interppnt)
 	wav4 = wav4.fillna(0)
-	OutWav = wav - wav4
 	OutWav = wav.sub(wav4)
 	if not quiet:
 		print 'Takeoff_bac t2: {}'.format(OutWav)
-		print 'Takeoff_bac t3: {}'.format(wav)
-		print 'Takeoff_bac t4: {}'.format(wav4)
 	return OutWav
 
 def Get_back(wav,pntsm,frac):
