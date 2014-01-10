@@ -2,9 +2,10 @@ import h5py
 import scipy.io as sio
 
 
-def getShotmat(shot=118800):
+def getShotmat(shot=118800,fnam=None):
 
-    fnam = 'shot_'+str(shot)
+    if fnam==None:
+        fnam = 'shot_'+str(shot)
     hold = sio.loadmat(fnam,appendmat=True,squeeze_me=True,struct_as_record=True)
 
     sigs = ['nela',
@@ -33,3 +34,11 @@ def getShotmat(shot=118800):
     fstore.close()
 
     return 'Complete download: '+str(shot)
+
+def load2DICT(fNAM):
+    filIN = h5py.File(fNAM,'r')
+    Names = filIN.keys()
+    outDICT = {}
+    for i in len(Names):
+        outDICT[Names[i]] = filIN[Names[i]].value
+    return outDICT
