@@ -46,7 +46,6 @@ warnings.simplefilter('ignore', DeprecationWarning)
 # tubeNum = 48
 ####### End String Define #####
 def grab(SHOT,tubeNum=48,TreeName='helios',write_files=False,make_raw=False,make_tBase=True,quiet=True):
-    #mds.Connection(ServerName)
     TreeObj = mds.Tree(TreeName,SHOT,'EDIT')
 
     ####### Grab data #######
