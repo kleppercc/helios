@@ -38,6 +38,8 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 		newARR_sh_sm = pds.DataFrame(listHolder1).T
 		holdNam = newARR_sh_sm.columns
 		newARR_sh_sm.columns = np.arange(tubeNUM)
+		if not quiet:
+			print 'Done: smoothWavs'
 		# need to clean up the name versus column mess.
 		for i in xrange(tubeNUM):
 			newARR_sh_sm[i].name = holdNam[i]
@@ -56,6 +58,8 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 		if debug and not quiet:
 			for k in xrange(tubeNUM):
 				print 'makWavs t3: {}'.format(newARR_backoff[k].name)
+		if not quiet:
+			print "Done: backoff Waves"
 	else:
 		listHolder2=[]
 		for j in xrange(tubeNUM):
@@ -69,7 +73,10 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 		if debug and not quiet:
 			for k in xrange(tubeNUM):
 				print 'makWavs t4: {}'.format(newARR_backoff[k].name)
-	print 'Downsampled signals are {:.1} Hz'.format(newARR_Short.shape[0]/tottime)
+		if not quiet:
+			print "Done: backoff Waves"
+	if not quiet:
+		print 'Downsampled signals are {:.1} Hz'.format(newARR_Short.shape[0]/tottime)
 	return newARR_Short,newARR_sh_sm,newARR_backoff
 
 def smoothWavs(wav,stdev=None,quiet=True,debug=False):
@@ -82,12 +89,10 @@ def smoothWavs(wav,stdev=None,quiet=True,debug=False):
 	return wavSM
 
 def getTimes(shot,fnamH5,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debug=False):
-	
 	if load2HDF:
 		if fnamMAT == None:
 			fnamMAT='/Users/unterbee/Desktop/shot_118800.mat'
 		gST.getShotmat(118800,fnamMAT)
-	
 	dataDICT = gST.load2DICT(fnamH5)
 	if fixSHE:
 		oldX=dataDICT['x_she1']
@@ -96,7 +101,6 @@ def getTimes(shot,fnamH5,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debu
 		dataDICT['y_she_corr']=oldY[:]-np.mean(oldY[0:10])
 		ind = np.where((dataDICT['y_she_corr']/dataDICT['y_she_corr'].max()) > 0.5)
 	else:
-
 		ind = np.where((dataDICT['y_she1']/dataDICT['y_she1'].max()) > 0.5)
 	# tValues = x_she1[ind]
 
