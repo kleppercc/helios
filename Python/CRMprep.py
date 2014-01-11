@@ -96,11 +96,46 @@ def getTimes(shot,fnamH5,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debu
 		dataDICT['y_she_corr']=oldY[:]-np.mean(oldY[0:10])
 		ind = np.where((dataDICT['y_she_corr']/dataDICT['y_she_corr'].max()) > 0.5)
 	else:
+
 		ind = np.where((dataDICT['y_she1']/dataDICT['y_she1'].max()) > 0.5)
 	# tValues = x_she1[ind]
 
 	return dataDICT
 	# return tValues
+
+# Function GetTimes()
+	
+# 	Wave y_she_corr
+# 	Wave x_she1
+	
+# 	Make/n=1/o tValues,temp
+# 	Wavestats/Q x_she1
+# 	Variable i, hold
+# 	for(i=0;i<V_npnts;i+=1)
+# 		hold=y_she_corr[i]
+# 		if(hold>0.5)
+# 			temp = x_she1[i]
+# 			Concatenate/NP {temp},tValues
+# 		endif
+# 	endfor
+# 	DeletePoints 0,1,tValues
+# 	KillWaves/Z temp
+# End
+
+# Function FindIndex()
+	
+# 	DFREF dREF = root:s118794_wavs
+# 	Wave/SDFR=dREF tValues
+	
+# 	Make/n=1 holder
+	
+# 	WaveStats/Q tValues
+# 	Variable i,hold
+# 	for(i=0;i<V_npnts;i+=1)
+# 		hold = tValue[i]
+# 		FindValue/V=hold/T=1e-2 tBase_L
+# 	endfor
+# End
 
 # def findIndex(tValues,tBase_L_fix):
 
@@ -118,20 +153,6 @@ def getTimes(shot,fnamH5,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debu
 # 			tIndex = np.append(tIndex, temp2)
 
 # 	return tIndex
-# Function FindIndex()
-	
-# 	DFREF dREF = root:s118794_wavs
-# 	Wave/SDFR=dREF tValues
-	
-# 	Make/n=1 holder
-	
-# 	WaveStats/Q tValues
-# 	Variable i,hold
-# 	for(i=0;i<V_npnts;i+=1)
-# 		hold = tValue[i]
-# 		FindValue/V=hold/T=1e-2 tBase_L
-# 	endfor
-# End
 
 # def makeChanDICT():
 
