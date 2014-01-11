@@ -9,6 +9,7 @@ import helios.Python.getSHOT as gST
 reload(getHEL)
 reload(SmU)
 reload(palop)
+reload(gST)
 
 def loadtoPDS(SHOT,tubeNUM=48,quiet=True):
 	outDICT = getHEL.grab(SHOT,tubeNUM,make_raw=False,make_tBase=True,quiet=quiet)
@@ -80,19 +81,26 @@ def smoothWavs(wav,stdev=None,quiet=True,debug=False):
 		print 'smoothWavs t1: {}'.format(wavSM.name)
 	return wavSM
 
-def getTimes(shot,fnamH5,fnamMAT=None,quiet=True,load2HDF=False,debug=False):
+def getTimes(shot,fnamH5,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debug=False):
 	
 	if load2HDF:
 		if fnamMAT == None:
 			fnamMAT='/Users/unterbee/Desktop/shot_118800.mat'
 		gST.getShotmat(118800,fnamMAT)
 	
-	print 'test'
 	dataDICT = gST.load2DICT(fnamH5)
+	if fixSHE:
+		oldX=dataDICT['x_she1']
+		oldY=dataDICT['y_she1']
+		dataDICT['x_she_corr']=oldX[:]+0.04
+		dataDICT['y_she_corr']=oldY[:]-np.mean(oldY[0:10])
+		ind = np.where((dataDICT['y_she_corr']/dataDICT['y_she_corr'].max()) > 0.5)
+	else:
 
-	# ind = np.where(dataDICT['y_she_corr'] > 0.5)
+		ind = np.where((dataDICT['y_she1']/dataDICT['y_she1'].max()) > 0.5)
 	# tValues = x_she1[ind]
 
+	return dataDICT
 	# return tValues
 
 # Function GetTimes()
