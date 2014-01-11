@@ -48,7 +48,7 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 				print 'makWavs t2: {}'.format(newARR_sh_sm[i].name)
 		listHolder2=[]
 		for j in xrange(tubeNUM):
-			listHolder2.append(pds.Series(SmU.Takeoff_bac(newARR_sh_sm[j],pntsm=bacPNTSM,interppnt=bacinterppnt,frac=bacfrac,quiet=quiet),name = newARR_sh_sm[j].name+'_bac'))
+			listHolder2.append(pds.Series(SmU.Takeoff_bac(newARR_sh_sm[j],pntsm=bacPNTSM,interppnt=bacinterppnt,frac=bacfrac,quiet=quiet,debug=debug),name = newARR_sh_sm[j].name+'_bac'))
 		newARR_backoff = pds.DataFrame(listHolder2).T
 		holdNam = newARR_backoff.columns
 		newARR_backoff.columns = np.arange(tubeNUM)
