@@ -2,14 +2,14 @@
 import numpy as np
 import pandas as pds
 
-def Takeoff_bac(wav,pntsm,interppnt,frac,quiet=True):
-	if not quiet:
+def Takeoff_bac(wav,pntsm,interppnt,frac,quiet=True,debug=False):
+	if debug and not quiet:
 		print 'Takeoff_bac t1: {}'.format(wav.name)
 	wav2 = Get_back(wav,pntsm,frac)
 	wav4 = pds.stats.moments.rolling_min(wav2,interppnt)
 	wav4 = wav4.fillna(0)
 	OutWav = wav.sub(wav4)
-	if not quiet:
+	if debug and not quiet:
 		print 'Takeoff_bac t2: {}'.format(OutWav)
 	return OutWav
 
