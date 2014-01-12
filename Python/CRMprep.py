@@ -67,26 +67,31 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 		# ditto to above
 		for i in xrange(tubeNUM):
 			newARR_backoff[i].name = holdNam[i]
-		if debug and not quiet:
-			for k in xrange(tubeNUM):
-				print 'makWavs t4: {}'.format(newARR_backoff[k].name)
+			if debug and not quiet:
+				print 'makWavs t4: {}'.format(newARR_backoff[i].name)
 		if not quiet:
 			print "Done: backoff Waves"
 	if not quiet:
 		print 'Downsampled signals are {:.1} Hz'.format(newARR_Short.shape[0]/tottime)
 	return newARR_Short,newARR_sh_sm,newARR_backoff
 
-# def truncWavs(tIndex,tBase_L,ChanDICT):
-
-
-def smoothWavs(wav,stdev=None,quiet=True,debug=False):
-	if stdev == None:
-		stdev = 7
-	wavSM = pds.Series(palop.smooth(wav,stdev),index=wav.index)
-	wavSM.name = wav.name+'_palop'
-	if debug and not quiet:
-		print 'smoothWavs t1: {}'.format(wavSM.name)
-	return wavSM
+def truncWavs(shot,chanDFram,fnamH5,truncVal=0.95,debug=False,quiet=True):
+	wavNum = chanDFram.shape[1]
+	tVal,_ = getTimes(shot,fnamH5,truncVal=truncVal)
+	wavIND = findIndex(tVal,chanDFram[0].index,quiet=quiet)
+	
+	listHolder=[]
+	for i in xrange(wavNum):
+		listHolder.append(pds.Series(chanDFram[i][wavIND].values,index=chanDFram[i][wavIND].index,name = chanDFram[i].name+'_trunc'))
+	newARR_trunc = pds.DataFrame(listHolder).T
+	holdNam = newARR_trunc.columns
+	newARR_trunc.columns = np.arange(wavNum)
+	# ditto to above
+	for j in xrange(wavNum):
+		newARR_trunc[j].name = holdNam[j]
+		if debug and not quiet:
+				print 'truncWavs t1: {}'.format(newARR_trunc[j].name)
+	return newARR_trunc
 
 def getTimes(shot,fnamH5,truncVal=0.9,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debug=False):
 	if load2HDF:
