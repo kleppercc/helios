@@ -1,6 +1,9 @@
 #SmoothUtils
 import numpy as np
 import pandas as pds
+import helios.Python.palop as palop
+
+reload(palop)
 
 def Takeoff_bac(wav,pntsm,interppnt,frac,quiet=True,debug=False):
 	if debug and not quiet:
@@ -30,3 +33,12 @@ def PerctSmooth(inWav,start,end,frac,stddev=False):
 		return outWav, stddevWav
 	else:
 		return outWav
+
+def smoothWavs(wav,stdev=None,quiet=True,debug=False):
+	if stdev == None:
+		stdev = 7
+	wavSM = pds.Series(palop.smooth(wav,stdev),index=wav.index)
+	wavSM.name = wav.name+'_palop'
+	if debug and not quiet:
+		print 'smoothWavs t1: {}'.format(wavSM.name)
+	return wavSM
