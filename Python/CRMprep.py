@@ -1,14 +1,11 @@
-import time
 import numpy as np
 import pandas as pds
 import helios.Python.get_HELIOS_v2 as getHEL
-import helios.Python.palop as palop
 import helios.Python.SmoothUtils as SmU
 import helios.Python.getSHOT as gST
 
 reload(getHEL)
 reload(SmU)
-reload(palop)
 reload(gST)
 
 def loadtoPDS(SHOT,tubeNUM=48,quiet=True):
@@ -33,7 +30,7 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 	if smoothTF:
 		listHolder1=[]
 		for i in xrange(tubeNUM):
-			hold = smoothWavs(newARR_Short[i],stdev=smstdev,quiet=quiet,debug=debug)
+			hold = SmU.smoothWavs(newARR_Short[i],stdev=smstdev,quiet=quiet,debug=debug)
 			listHolder1.append(pds.Series(data=hold.values,index=hold.index,name=hold.name))
 		newARR_sh_sm = pds.DataFrame(listHolder1).T
 		holdNam = newARR_sh_sm.columns
@@ -63,7 +60,7 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 	else:
 		listHolder2=[]
 		for j in xrange(tubeNUM):
-			listHolder2.append(pds.Series(SmU.Takeoff_bac(newARR_Short[j],pntsm=pntsm,interppnt=interppnt,frac=frac,quiet=quiet),name = newARR_Short[j].name+'_bac'))
+			listHolder2.append(pds.Series(SmU.Takeoff_bac(newARR_Short[j],pntsm=bacPNTSM,interppnt=bacinterppnt,frac=bacfrac,quiet=quiet,debug=debug),name = newARR_Short[j].name+'_bac'))
 		newARR_backoff = pds.DataFrame(listHolder2).T
 		holdNam = newARR_backoff.columns
 		newARR_backoff.columns = np.arange(tubeNUM)
@@ -78,6 +75,9 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 	if not quiet:
 		print 'Downsampled signals are {:.1} Hz'.format(newARR_Short.shape[0]/tottime)
 	return newARR_Short,newARR_sh_sm,newARR_backoff
+
+# def truncWavs(tIndex,tBase_L,ChanDICT):
+
 
 def smoothWavs(wav,stdev=None,quiet=True,debug=False):
 	if stdev == None:
@@ -102,43 +102,23 @@ def getTimes(shot,fnamH5,truncVal=0.9,fnamMAT=None,load2HDF=False,fixSHE=True,qu
 		ind = np.where((dataDICT['y_she_corr']/dataDICT['y_she_corr'].max()) > truncVal)
 	else:
 		ind = np.where((dataDICT['y_she1']/dataDICT['y_she1'].max()) > truncVal)
-	
 	tValues = dataDICT['x_she_corr'][ind]
 	if debug and not quiet:
 		print "num data, num trunc {} {}".format(dataDICT['x_she_corr'].shape,tValues.shape)
 	return tValues,ind
 
 
-def findIndex(tValues,tBase_L_fix):
-
+def findIndex(tValues,tBase_IN,quiet=True):
+	inWAV = np.asarray(tBase_IN)
 	temp = ()
 	for i in xrange(len(tValues)):
 		hold = tValues[i]
-		holder = np.argmin(np.abs(tBase_L_fix - hold))
-		# temp = np.append(temp,holder)
+		holder = np.argmin(np.abs(inWAV - hold))
+		temp = np.append(temp,holder)
 
-	# tIndex = ()
-
-	# for i in xrange(len(temp)):
-	# 	if(temp[i] != temp[i-1]):
-	# 		temp2 = temp[i]
-	# 		tIndex = np.append(tIndex, temp2)
-
-	# return tIndex
-
-def makRatios():
-	return
-# def makeChanDICT():
-
-# 	chWav = []
-# 	for i in xrange(start,stop):
-# 		chWav.append('CH'+str(i))
-# 	suf1 = '_R668728'
-# 	suf2 = '_R728706'
-# 	chanDICT ={}
-# 	for i in chWav:
-# 		chanDICT[chWav[i]+suf1] = 0.0
-# 		chanDICT[chWav[i]+suf2] = 0.0
-
-# 	return ChanDICT
-# def truncWavs(tIndex,tBase_L,ChanDICT):
+	WavtIndex = ()
+	for i in xrange(len(temp)):
+		if(temp[i] != temp[i-1]):
+			temp2 = temp[i]
+			WavtIndex = np.append(WavtIndex, temp2)
+	return WavtIndex.astype(int)
