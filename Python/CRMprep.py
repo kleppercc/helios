@@ -88,7 +88,7 @@ def smoothWavs(wav,stdev=None,quiet=True,debug=False):
 		print 'smoothWavs t1: {}'.format(wavSM.name)
 	return wavSM
 
-def getTimes(shot,fnamH5,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debug=False):
+def getTimes(shot,fnamH5,truncVal=0.9,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debug=False):
 	if load2HDF:
 		if fnamMAT == None:
 			fnamMAT='/Users/unterbee/Desktop/shot_118800.mat'
@@ -99,65 +99,35 @@ def getTimes(shot,fnamH5,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debu
 		oldY=dataDICT['y_she1']
 		dataDICT['x_she_corr']=oldX[:]+0.04
 		dataDICT['y_she_corr']=oldY[:]-np.mean(oldY[0:10])
-		ind = np.where((dataDICT['y_she_corr']/dataDICT['y_she_corr'].max()) > 0.5)
+		ind = np.where((dataDICT['y_she_corr']/dataDICT['y_she_corr'].max()) > truncVal)
 	else:
-		ind = np.where((dataDICT['y_she1']/dataDICT['y_she1'].max()) > 0.5)
-	# tValues = x_she1[ind]
-
-	return dataDICT
-	# return tValues
-
-# Function GetTimes()
+		ind = np.where((dataDICT['y_she1']/dataDICT['y_she1'].max()) > truncVal)
 	
-# 	Wave y_she_corr
-# 	Wave x_she1
-	
-# 	Make/n=1/o tValues,temp
-# 	Wavestats/Q x_she1
-# 	Variable i, hold
-# 	for(i=0;i<V_npnts;i+=1)
-# 		hold=y_she_corr[i]
-# 		if(hold>0.5)
-# 			temp = x_she1[i]
-# 			Concatenate/NP {temp},tValues
-# 		endif
-# 	endfor
-# 	DeletePoints 0,1,tValues
-# 	KillWaves/Z temp
-# End
+	tValues = dataDICT['x_she_corr'][ind]
+	if debug and not quiet:
+		print "num data, num trunc {} {}".format(dataDICT['x_she_corr'].shape,tValues.shape)
+	return tValues,ind
 
-# Function FindIndex()
-	
-# 	DFREF dREF = root:s118794_wavs
-# 	Wave/SDFR=dREF tValues
-	
-# 	Make/n=1 holder
-	
-# 	WaveStats/Q tValues
-# 	Variable i,hold
-# 	for(i=0;i<V_npnts;i+=1)
-# 		hold = tValue[i]
-# 		FindValue/V=hold/T=1e-2 tBase_L
-# 	endfor
-# End
 
-# def findIndex(tValues,tBase_L_fix):
+def findIndex(tValues,tBase_L_fix):
 
-# 	temp = ()
-# 	for i in tValues:
-# 		hold = tValues[i]
-# 		holder = np.argmin(np.abs(tBase_L_fix - hold))
-# 		temp = np.append(temp,holder)
+	temp = ()
+	for i in xrange(len(tValues)):
+		hold = tValues[i]
+		holder = np.argmin(np.abs(tBase_L_fix - hold))
+		# temp = np.append(temp,holder)
 
-# 	tIndex = ()
+	# tIndex = ()
 
-# 	for i in temp:
-# 		if(temp[i] != temp[i-1]):
-# 			temp2 = temp[i]
-# 			tIndex = np.append(tIndex, temp2)
+	# for i in xrange(len(temp)):
+	# 	if(temp[i] != temp[i-1]):
+	# 		temp2 = temp[i]
+	# 		tIndex = np.append(tIndex, temp2)
 
-# 	return tIndex
+	# return tIndex
 
+def makRatios():
+	return
 # def makeChanDICT():
 
 # 	chWav = []
@@ -171,6 +141,4 @@ def getTimes(shot,fnamH5,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debu
 # 		chanDICT[chWav[i]+suf2] = 0.0
 
 # 	return ChanDICT
-
 # def truncWavs(tIndex,tBase_L,ChanDICT):
-	# return
