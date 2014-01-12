@@ -79,10 +79,10 @@ def truncWavs(shot,chanDFram,fnamH5,truncVal=0.95,debug=False,quiet=True):
 	wavNum = chanDFram.shape[1]
 	tVal,_ = getTimes(shot,fnamH5,truncVal=truncVal)
 	wavIND = findIndex(tVal,chanDFram[0].index,quiet=quiet)
-	
+
 	listHolder=[]
 	for i in xrange(wavNum):
-		listHolder.append(pds.Series(chanDFram[i][wavIND].values,index=chanDFram[i][wavIND].index,name = chanDFram[i].name+'_trunc'))
+		listHolder.append(pds.Series(chanDFram[i][wavIND].values,index=chanDFram[i][wavIND].index,name = chanDFram[i].name+'_fin'))
 	newARR_trunc = pds.DataFrame(listHolder).T
 	holdNam = newARR_trunc.columns
 	newARR_trunc.columns = np.arange(wavNum)
