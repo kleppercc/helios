@@ -3,7 +3,6 @@ import pandas as pds
 import helios.Python.get_HELIOS_v2 as getHEL
 import helios.Python.SmoothUtils as SmU
 import helios.Python.getSHOT as gST
-
 reload(getHEL)
 reload(SmU)
 reload(gST)
@@ -36,7 +35,7 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 		holdNam = newARR_sh_sm.columns
 		newARR_sh_sm.columns = np.arange(tubeNUM)
 		if not quiet:
-			print 'Done: smoothWavs'
+			print 'Done: smoothWavs  : Sehr Gut'
 		# need to clean up the name versus column mess.
 		for i in xrange(tubeNUM):
 			newARR_sh_sm[i].name = holdNam[i]
@@ -56,7 +55,7 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 			for k in xrange(tubeNUM):
 				print 'makWavs t3: {}'.format(newARR_backoff[k].name)
 		if not quiet:
-			print "Done: backoff Waves"
+			print "Done: backoff Waves  : Sehr Gut"
 	else:
 		listHolder2=[]
 		for j in xrange(tubeNUM):
@@ -70,7 +69,7 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 			if debug and not quiet:
 				print 'makWavs t4: {}'.format(newARR_backoff[i].name)
 		if not quiet:
-			print "Done: backoff Waves"
+			print "Done: backoff Waves  : Sehr Gut"
 	if not quiet:
 		print 'Downsampled signals are {:.1} Hz'.format(newARR_Short.shape[0]/tottime)
 	return newARR_Short,newARR_sh_sm,newARR_backoff
@@ -90,7 +89,9 @@ def truncWavs(shot,chanDFram,fnamH5,truncVal=0.95,debug=False,quiet=True):
 	for j in xrange(wavNum):
 		newARR_trunc[j].name = holdNam[j]
 		if debug and not quiet:
-				print 'truncWavs t1: {}'.format(newARR_trunc[j].name)
+			print 'truncWavs t1: {}'.format(newARR_trunc[j].name)
+	if not quiet:
+		print 'truncWavs: Done : Sehr Gut'
 	return newARR_trunc
 
 def getTimes(shot,fnamH5,truncVal=0.9,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debug=False):
