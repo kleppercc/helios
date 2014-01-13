@@ -1,14 +1,11 @@
-import time
 import numpy as np
 import pandas as pds
 import helios.Python.get_HELIOS_v2 as getHEL
-import helios.Python.palop as palop
 import helios.Python.SmoothUtils as SmU
 import helios.Python.getSHOT as gST
 
 reload(getHEL)
 reload(SmU)
-reload(palop)
 reload(gST)
 
 def loadtoPDS(SHOT,tubeNUM=48,quiet=True):
@@ -33,11 +30,13 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 	if smoothTF:
 		listHolder1=[]
 		for i in xrange(tubeNUM):
-			hold = smoothWavs(newARR_Short[i],stdev=smstdev,quiet=quiet,debug=debug)
+			hold = SmU.smoothWavs(newARR_Short[i],stdev=smstdev,quiet=quiet,debug=debug)
 			listHolder1.append(pds.Series(data=hold.values,index=hold.index,name=hold.name))
 		newARR_sh_sm = pds.DataFrame(listHolder1).T
 		holdNam = newARR_sh_sm.columns
 		newARR_sh_sm.columns = np.arange(tubeNUM)
+		if not quiet:
+			print 'Done: smoothWavs'
 		# need to clean up the name versus column mess.
 		for i in xrange(tubeNUM):
 			newARR_sh_sm[i].name = holdNam[i]
@@ -46,7 +45,7 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 				print 'makWavs t2: {}'.format(newARR_sh_sm[i].name)
 		listHolder2=[]
 		for j in xrange(tubeNUM):
-			listHolder2.append(pds.Series(SmU.Takeoff_bac(newARR_sh_sm[j],pntsm=bacPNTSM,interppnt=bacinterppnt,frac=bacfrac,quiet=quiet),name = newARR_sh_sm[j].name+'_bac'))
+			listHolder2.append(pds.Series(SmU.Takeoff_bac(newARR_sh_sm[j],pntsm=bacPNTSM,interppnt=bacinterppnt,frac=bacfrac,quiet=quiet,debug=debug),name = newARR_sh_sm[j].name+'_bac'))
 		newARR_backoff = pds.DataFrame(listHolder2).T
 		holdNam = newARR_backoff.columns
 		newARR_backoff.columns = np.arange(tubeNUM)
@@ -56,117 +55,75 @@ def makWavs(fluxARR,headerDICT,tubeNUM=48,baseNum=100,smstdev=7,bacPNTSM=5,bacin
 		if debug and not quiet:
 			for k in xrange(tubeNUM):
 				print 'makWavs t3: {}'.format(newARR_backoff[k].name)
+		if not quiet:
+			print "Done: backoff Waves"
 	else:
 		listHolder2=[]
 		for j in xrange(tubeNUM):
-			listHolder2.append(pds.Series(SmU.Takeoff_bac(newARR_Short[j],pntsm=pntsm,interppnt=interppnt,frac=frac,quiet=quiet),name = newARR_Short[j].name+'_bac'))
+			listHolder2.append(pds.Series(SmU.Takeoff_bac(newARR_Short[j],pntsm=bacPNTSM,interppnt=bacinterppnt,frac=bacfrac,quiet=quiet,debug=debug),name = newARR_Short[j].name+'_bac'))
 		newARR_backoff = pds.DataFrame(listHolder2).T
 		holdNam = newARR_backoff.columns
 		newARR_backoff.columns = np.arange(tubeNUM)
 		# ditto to above
 		for i in xrange(tubeNUM):
 			newARR_backoff[i].name = holdNam[i]
-		if debug and not quiet:
-			for k in xrange(tubeNUM):
-				print 'makWavs t4: {}'.format(newARR_backoff[k].name)
-	print 'Downsampled signals are {:.1} Hz'.format(newARR_Short.shape[0]/tottime)
+			if debug and not quiet:
+				print 'makWavs t4: {}'.format(newARR_backoff[i].name)
+		if not quiet:
+			print "Done: backoff Waves"
+	if not quiet:
+		print 'Downsampled signals are {:.1} Hz'.format(newARR_Short.shape[0]/tottime)
 	return newARR_Short,newARR_sh_sm,newARR_backoff
 
-def smoothWavs(wav,stdev=None,quiet=True,debug=False):
-	if stdev == None:
-		stdev = 7
-	wavSM = pds.Series(palop.smooth(wav,stdev),index=wav.index)
-	wavSM.name = wav.name+'_palop'
-	if debug and not quiet:
-		print 'smoothWavs t1: {}'.format(wavSM.name)
-	return wavSM
+def truncWavs(shot,chanDFram,fnamH5,truncVal=0.95,debug=False,quiet=True):
+	wavNum = chanDFram.shape[1]
+	tVal,_ = getTimes(shot,fnamH5,truncVal=truncVal)
+	wavIND = findIndex(tVal,chanDFram[0].index,quiet=quiet)
 
-def getTimes(shot,fnamH5,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debug=False):
-	
+	listHolder=[]
+	for i in xrange(wavNum):
+		listHolder.append(pds.Series(chanDFram[i][wavIND].values,index=chanDFram[i][wavIND].index,name = chanDFram[i].name+'_fin'))
+	newARR_trunc = pds.DataFrame(listHolder).T
+	holdNam = newARR_trunc.columns
+	newARR_trunc.columns = np.arange(wavNum)
+	# ditto to above
+	for j in xrange(wavNum):
+		newARR_trunc[j].name = holdNam[j]
+		if debug and not quiet:
+				print 'truncWavs t1: {}'.format(newARR_trunc[j].name)
+	return newARR_trunc
+
+def getTimes(shot,fnamH5,truncVal=0.9,fnamMAT=None,load2HDF=False,fixSHE=True,quiet=True,debug=False):
 	if load2HDF:
 		if fnamMAT == None:
 			fnamMAT='/Users/unterbee/Desktop/shot_118800.mat'
 		gST.getShotmat(118800,fnamMAT)
-	
 	dataDICT = gST.load2DICT(fnamH5)
 	if fixSHE:
 		oldX=dataDICT['x_she1']
 		oldY=dataDICT['y_she1']
 		dataDICT['x_she_corr']=oldX[:]+0.04
 		dataDICT['y_she_corr']=oldY[:]-np.mean(oldY[0:10])
-		ind = np.where((dataDICT['y_she_corr']/dataDICT['y_she_corr'].max()) > 0.5)
+		ind = np.where((dataDICT['y_she_corr']/dataDICT['y_she_corr'].max()) > truncVal)
 	else:
+		ind = np.where((dataDICT['y_she1']/dataDICT['y_she1'].max()) > truncVal)
+	tValues = dataDICT['x_she_corr'][ind]
+	if debug and not quiet:
+		print "num data, num trunc {} {}".format(dataDICT['x_she_corr'].shape,tValues.shape)
+	return tValues,ind
 
-		ind = np.where((dataDICT['y_she1']/dataDICT['y_she1'].max()) > 0.5)
-	# tValues = x_she1[ind]
 
-	return dataDICT
-	# return tValues
+def findIndex(tValues,tBase_IN,quiet=True):
+	inWAV = np.asarray(tBase_IN)
+	temp = ()
+	for i in xrange(len(tValues)):
+		hold = tValues[i]
+		holder = np.argmin(np.abs(inWAV - hold))
+		temp = np.append(temp,holder)
 
-# Function GetTimes()
-	
-# 	Wave y_she_corr
-# 	Wave x_she1
-	
-# 	Make/n=1/o tValues,temp
-# 	Wavestats/Q x_she1
-# 	Variable i, hold
-# 	for(i=0;i<V_npnts;i+=1)
-# 		hold=y_she_corr[i]
-# 		if(hold>0.5)
-# 			temp = x_she1[i]
-# 			Concatenate/NP {temp},tValues
-# 		endif
-# 	endfor
-# 	DeletePoints 0,1,tValues
-# 	KillWaves/Z temp
-# End
-
-# Function FindIndex()
-	
-# 	DFREF dREF = root:s118794_wavs
-# 	Wave/SDFR=dREF tValues
-	
-# 	Make/n=1 holder
-	
-# 	WaveStats/Q tValues
-# 	Variable i,hold
-# 	for(i=0;i<V_npnts;i+=1)
-# 		hold = tValue[i]
-# 		FindValue/V=hold/T=1e-2 tBase_L
-# 	endfor
-# End
-
-# def findIndex(tValues,tBase_L_fix):
-
-# 	temp = ()
-# 	for i in tValues:
-# 		hold = tValues[i]
-# 		holder = np.argmin(np.abs(tBase_L_fix - hold))
-# 		temp = np.append(temp,holder)
-
-# 	tIndex = ()
-
-# 	for i in temp:
-# 		if(temp[i] != temp[i-1]):
-# 			temp2 = temp[i]
-# 			tIndex = np.append(tIndex, temp2)
-
-# 	return tIndex
-
-# def makeChanDICT():
-
-# 	chWav = []
-# 	for i in xrange(start,stop):
-# 		chWav.append('CH'+str(i))
-# 	suf1 = '_R668728'
-# 	suf2 = '_R728706'
-# 	chanDICT ={}
-# 	for i in chWav:
-# 		chanDICT[chWav[i]+suf1] = 0.0
-# 		chanDICT[chWav[i]+suf2] = 0.0
-
-# 	return ChanDICT
-
-# def truncWavs(tIndex,tBase_L,ChanDICT):
-	# return
+	WavtIndex = ()
+	for i in xrange(len(temp)):
+		if(temp[i] != temp[i-1]):
+			temp2 = temp[i]
+			WavtIndex = np.append(WavtIndex, temp2)
+	return WavtIndex.astype(int)
