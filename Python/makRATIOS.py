@@ -6,7 +6,7 @@ def run(shot,HeliosDFram,CHDsetNum=6,CHDpath='/Users/unterbee/Dropbox/HELIOS Mas
 	# CHDwavBase = np.genfromtxt(CHDpath+'/Chd_num.txt',skip_header=1,dtype=str)
 	CHDsetupNum = np.genfromtxt(CHDpath+'/CHORDsetups.txt',skip_header=1,dtype=int,unpack=True)
 	CHDNumHold = CHDsetupNum[CHDsetNum]
-	if np.any((CHDNumHold> 200)):
+	if np.any((CHDNumHold > 200)):
 		CHDNumHold = CHDNumHold-200
 	prefix = 'CHD'
 	suffix1 = '_R728706'
@@ -75,4 +75,6 @@ def run(shot,HeliosDFram,CHDsetNum=6,CHDpath='/Users/unterbee/Dropbox/HELIOS Mas
 		newARR[j].name = holdNam[j]
 		if debug and not quiet:
 			print 'makRATIO t1: {}'.format(newARR[j].name)
+	if not quiet:
+		print 'makRATIO: Done : Sehr Gut'
 	return newARR
